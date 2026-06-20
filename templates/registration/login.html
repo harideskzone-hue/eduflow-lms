@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Login — EduFlow LMS{% endblock %}
+{% block meta_description %}Sign in to your EduFlow LMS account and continue learning.{% endblock %}
+{% block body_class %}page-centered{% endblock %}
+
+{% block content %}
+<div class="page-wrapper--form animate-fade-in-up" style="width:100%; padding:2rem 1rem;">
+    <div class="form-card">
+        <div style="text-align:center; margin-bottom:2rem;">
+            <span class="logo" style="display:block; font-size:1.1rem; margin-bottom:0.75rem;">EDUFLOW LMS</span>
+            <h1 style="font-size:2rem; font-weight:700; letter-spacing:-0.03em;" class="heading-gradient">Sign In</h1>
+            <p class="text-muted" style="margin-top:0.5rem;">Access your premium courses dashboard</p>
+        </div>
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-error" role="alert" style="margin-bottom:1.5rem;">
+            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="POST" id="login-form" class="form-body" novalidate>
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group {% if field.errors %}has-error{% endif %}">
+                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div class="form-error" role="alert">{% for e in field.errors %}{{ e }}{% endfor %}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary btn--lg" style="width:100%; margin-top:0.5rem;" id="btn-login">
+                Sign In &rarr;
+            </button>
+        </form>
+
+        <p style="text-align:center; color:var(--text-muted); font-size:0.875rem; margin-top:2rem;">
+            Don't have an account?
+            <a href="{% url 'register' %}" style="color:var(--accent-secondary); font-weight:500; text-decoration:none;" id="link-register">
+                Register Now
+            </a>
+        </p>
+    </div>
+</div>
+{% endblock %}

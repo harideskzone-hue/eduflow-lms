@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Audit Trail System — EduFlow LMS{% endblock %}
+{% block body_class %}page-standard{% endblock %}
+
+{% block extra_css %}
+<style>
+  .table-wrap { overflow-x: auto; border-radius: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+  thead th { padding: 0.875rem 1rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.07); text-align: left; white-space: nowrap; }
+  tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.15s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+  tbody td { padding: 0.875rem 1rem; vertical-align: top; }
+  .td-time  { font-family: monospace; font-size: 0.775rem; color: var(--text-muted); white-space: nowrap; }
+  .td-user  { font-weight: 500; }
+  .td-sys   { font-style: italic; color: var(--text-muted); }
+  .td-ip    { font-family: monospace; font-size: 0.775rem; color: var(--text-muted); }
+  .td-detail{ color: var(--text-muted); max-width: 280px; word-break: break-word; }
+  /* Action badges */
+  .a-create  { background: rgba(34,197,94,0.1);  color:#4ade80; border:1px solid rgba(34,197,94,0.2); }
+  .a-update  { background: rgba(59,130,246,0.1);  color:#60a5fa; border:1px solid rgba(59,130,246,0.2); }
+  .a-delete  { background: rgba(239,68,68,0.1);   color:#f87171; border:1px solid rgba(239,68,68,0.2); }
+  .a-view    { background: rgba(6,182,212,0.1);   color:#22d3ee; border:1px solid rgba(6,182,212,0.2); }
+  .a-special { background: rgba(168,85,247,0.1);  color:#c084fc; border:1px solid rgba(168,85,247,0.2); }
+  .a-system  { background: rgba(107,114,128,0.1); color:#9ca3af; border:1px solid rgba(107,114,128,0.1); }
+  .act-badge { font-weight:700; text-transform:uppercase; letter-spacing:0.05em; padding:0.2rem 0.55rem; border-radius:5px; font-size:0.7rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "instructor/_nav.html" %}
+<div class="page-wrapper" style="padding:2.5rem 2rem;">
+
+    <div class="page-header">
+        <div class="page-header__left">
+            <h1 class="page-title heading-gradient">🔐 Audit Trail</h1>
+            <p class="text-muted">Database security and compliance ledger</p>
+        </div>
+        <div class="page-header__right">
+            <a href="{% url 'monitoring_dashboard' %}" class="btn btn--sm btn-secondary" id="btn-monitoring">Diagnostics</a>
+            <a href="{% url 'instructor_dashboard' %}" class="btn btn--sm btn-secondary" id="btn-instructor">Instructor</a>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" style="margin-bottom:2rem;" role="region" aria-label="Audit statistics">
+        <div class="stat-card"><p class="stat-label">Total Records</p><p class="stat-value" style="font-size:1.75rem;">{{ total_records }}</p></div>
+        <div class="stat-card"><p class="stat-label">Actions Today</p><p class="stat-value" style="font-size:1.75rem;">{{ today_records }}</p></div>
+        <div class="stat-card" style="border-color:rgba(59,130,246,0.15);">
+            <p class="stat-label" style="color:#60a5fa;">Course Changes</p>
+            <p class="stat-value" style="font-size:1.75rem; color:#60a5fa;">{{ course_actions }}</p>
+        </div>
+        <div class="stat-card" style="border-color:rgba(168,85,247,0.15);">
+            <p class="stat-label" style="color:#c084fc;">Quiz Changes</p>
+            <p class="stat-value" style="font-size:1.75rem; color:#c084fc;">{{ quiz_actions }}</p>
+        </div>
+        <div class="stat-card"><p class="stat-label">Announcements</p><p class="stat-value" style="font-size:1.75rem;">{{ announcement_actions }}</p></div>
+        <div class="stat-card" style="border-color:rgba(16,185,129,0.15);">
+            <p class="stat-label" style="color:#34d399;">Certificates</p>
+            <p class="stat-value" style="font-size:1.75rem; color:#34d399;">{{ certificate_actions }}</p>
+        </div>
+    </div>
+
+    <!-- Audit ledger table -->
+    <div class="card" style="padding:0; overflow:hidden;">
+        <div style="padding:1.5rem 1.75rem; border-bottom:1px solid rgba(255,255,255,0.06);">
+            <h2 style="font-size:1rem; font-weight:600;">Database Audit Ledger — Last 100 Actions</h2>
+        </div>
+        {% if audit_logs %}
+        <div class="table-wrap">
+            <table aria-label="Audit log entries">
+                <thead>
+                    <tr>
+                        <th scope="col">Timestamp</th>
+                        <th scope="col">User</th>
+                        <th scope="col">IP Address</th>
+                        <th scope="col">Action</th>
+                        <th scope="col">Target</th>
+                        <th scope="col">Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in audit_logs %}
+                    <tr>
+                        <td class="td-time">{{ log.created_at|date:"Y-m-d H:i:s" }}</td>
+                        <td class="td-user">
+                            {% if log.user %}{{ log.user.username }}
+                            {% else %}<span class="td-sys">System</span>{% endif %}
+                        </td>
+                        <td class="td-ip">{{ log.ip_address|default:"—" }}</td>
+                        <td>
+                            {% if "CREATE" in log.action %}<span class="act-badge a-create">Create</span>
+                            {% elif "UPDATE" in log.action %}<span class="act-badge a-update">Update</span>
+                            {% elif "DELETE" in log.action %}<span class="act-badge a-delete">Delete</span>
+                            {% elif "VIEW" in log.action %}<span class="act-badge a-view">View</span>
+                            {% elif "PUBLISH" in log.action or "ISSUE" in log.action %}<span class="act-badge a-special">{{ log.action }}</span>
+                            {% else %}<span class="act-badge a-system">{{ log.action }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if log.object_type %}<strong>{{ log.object_type }}</strong>{% if log.object_id %} #{{ log.object_id }}{% endif %}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td class="td-detail">{{ log.details|truncatechars:100 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding:4rem;">
+            <span class="empty-state__icon">🔐</span>
+            <p class="empty-state__title">No audit entries</p>
+            <p class="empty-state__text">Logs will appear as administrative actions occur.</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

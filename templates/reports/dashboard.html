@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Reports & Exports — EduFlow LMS{% endblock %}
+{% block body_class %}page-standard{% endblock %}
+
+{% block extra_css %}
+<style>
+  .export-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
+  .export-card {
+    display: flex; flex-direction: column; justify-content: space-between; gap: 1.25rem;
+    background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 18px; padding: 1.5rem;
+    transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  .export-card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); }
+  .export-name { font-size: 1rem; font-weight: 600; display: block; margin-bottom: 0.4rem; }
+  .export-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.55; }
+  .btn-dl {
+    display: inline-block; padding: 0.7rem 1.25rem;
+    border-radius: 12px; font-weight: 700; font-size: 0.875rem;
+    text-decoration: none; text-align: center; color: #fff;
+    transition: all 0.25s; border: none; cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  .btn-dl:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.3); color: #fff; }
+  .btn-dl--green  { background: linear-gradient(135deg, #10b981, #059669); }
+  .btn-dl--blue   { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+  .btn-dl--purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+  .btn-dl--pink   { background: linear-gradient(135deg, #d946ef, #c084fc); }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "instructor/_nav.html" %}
+<div class="page-wrapper" style="padding: 2.5rem 2rem;">
+
+    <div class="page-header">
+        <div class="page-header__left">
+            <h1 class="page-title heading-gradient">📊 Reports & Exports</h1>
+            <p class="text-muted">EduFlow administration and academic records panel</p>
+        </div>
+        <div class="page-header__right">
+            <a href="{% url 'monitoring_dashboard' %}" class="btn btn--sm btn-secondary" id="btn-monitoring">Diagnostics</a>
+            <a href="{% url 'audit_dashboard' %}" class="btn btn--sm btn-secondary" id="btn-audit">Audit Trail</a>
+            <a href="{% url 'instructor_dashboard' %}" class="btn btn--sm btn-secondary" id="btn-instructor">Instructor</a>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" style="margin-bottom: 2.5rem;" role="region" aria-label="Platform statistics">
+        <div class="stat-card"><p class="stat-label">👥 Students</p><p class="stat-value" style="font-size:1.75rem;">{{ total_students }}</p></div>
+        <div class="stat-card"><p class="stat-label"><i data-lucide="book-open" class="icon-inline"></i> Courses</p><p class="stat-value" style="font-size:1.75rem;">{{ total_courses }}</p></div>
+        <div class="stat-card" style="border-color:rgba(59,130,246,0.15);">
+            <p class="stat-label" style="color:#60a5fa;">Enrollments</p>
+            <p class="stat-value" style="font-size:1.75rem; color:#60a5fa;">{{ total_enrollments }}</p>
+        </div>
+        <div class="stat-card" style="border-color:rgba(16,185,129,0.15);">
+            <p class="stat-label" style="color:#34d399;">Certificates</p>
+            <p class="stat-value" style="font-size:1.75rem; color:#34d399;">{{ total_certificates }}</p>
+        </div>
+        <div class="stat-card" style="border-color:rgba(168,85,247,0.15);">
+            <p class="stat-label" style="color:#c084fc;">Quiz Attempts</p>
+            <p class="stat-value" style="font-size:1.75rem; color:#c084fc;">{{ total_quiz_attempts }}</p>
+        </div>
+        <div class="stat-card"><p class="stat-label">🔐 Audit Logs</p><p class="stat-value" style="font-size:1.75rem;">{{ total_audit_records }}</p></div>
+    </div>
+
+    <!-- CSV Reports -->
+    <section style="margin-bottom: 2.5rem;" aria-labelledby="csv-heading">
+        <div class="card">
+            <h2 id="csv-heading" class="section-title" style="margin-bottom: 1.5rem;">📋 CSV Spreadsheet Reports</h2>
+            <div class="export-grid">
+                <div class="export-card">
+                    <div>
+                        <span class="export-name">Enrollment Report</span>
+                        <p class="export-desc">All course enrollments, student details, and completion percentages.</p>
+                    </div>
+                    <a href="{% url 'export_enrollments_csv' %}" class="btn-dl btn-dl--green" id="csv-enrollments">Download CSV &darr;</a>
+                </div>
+                <div class="export-card">
+                    <div>
+                        <span class="export-name">Quiz Results Report</span>
+                        <p class="export-desc">All quiz attempts with scores, pass/fail status, and timestamps.</p>
+                    </div>
+                    <a href="{% url 'export_quiz_results_csv' %}" class="btn-dl btn-dl--blue" id="csv-quiz">Download CSV &darr;</a>
+                </div>
+                <div class="export-card">
+                    <div>
+                        <span class="export-name">Certificates Report</span>
+                        <p class="export-desc">All graduation records with student credentials and issued dates.</p>
+                    </div>
+                    <a href="{% url 'export_certificates_csv' %}" class="btn-dl btn-dl--purple" id="csv-certs">Download CSV &darr;</a>
+                </div>
+                <div class="export-card">
+                    <div>
+                        <span class="export-name">Audit Trail Report</span>
+                        <p class="export-desc">Full database security logs with activity metadata and IP addresses.</p>
+                    </div>
+                    <a href="{% url 'export_audit_logs_csv' %}" class="btn-dl btn-dl--pink" id="csv-audit">Download CSV &darr;</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Excel Reports -->
+    <section style="margin-bottom: 2.5rem;" aria-labelledby="excel-heading">
+        <div class="card">
+            <h2 id="excel-heading" class="section-title" style="margin-bottom: 1.5rem;">📊 Excel Reports (.xlsx)</h2>
+            <div class="export-grid">
+                <div class="export-card">
+                    <div>
+                        <span class="export-name">Enrollment Report</span>
+                        <p class="export-desc">Enrollments with completion percentages — formatted Excel workbook.</p>
+                    </div>
+                    <a href="{% url 'export_enrollments_excel' %}" class="btn-dl btn-dl--green" id="xlsx-enrollments">Download Excel &darr;</a>
+                </div>
+                <div class="export-card">
+                    <div>
+                        <span class="export-name">Quiz Results Report</span>
+                        <p class="export-desc">Quiz attempts and scores — formatted Excel workbook.</p>
+                    </div>
+                    <a href="{% url 'export_quiz_results_excel' %}" class="btn-dl btn-dl--blue" id="xlsx-quiz">Download Excel &darr;</a>
+                </div>
+                <div class="export-card">
+                    <div>
+                        <span class="export-name">Certificates Report</span>
+                        <p class="export-desc">Graduation records with certification dates — formatted Excel workbook.</p>
+                    </div>
+                    <a href="{% url 'export_certificates_excel' %}" class="btn-dl btn-dl--purple" id="xlsx-certs">Download Excel &darr;</a>
+                </div>
+                <div class="export-card">
+                    <div>
+                        <span class="export-name">Audit Trail Report</span>
+                        <p class="export-desc">Security logs with IP addresses — formatted Excel workbook.</p>
+                    </div>
+                    <a href="{% url 'export_audit_logs_excel' %}" class="btn-dl btn-dl--pink" id="xlsx-audit">Download Excel &darr;</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PDF Reports -->
+    <section aria-labelledby="pdf-heading">
+        <div class="card">
+            <h2 id="pdf-heading" class="section-title" style="margin-bottom: 1.5rem;"><i data-lucide="file-text" class="icon-inline"></i> PDF Reports (.pdf)</h2>
+            <div class="export-grid">
+                <div class="export-card">
+                    <div>
+                        <span class="export-name">Audit Summary Report</span>
+                        <p class="export-desc">Recent security compliance records (up to 100 entries) in a formatted PDF.</p>
+                    </div>
+                    <a href="{% url 'export_audit_summary_pdf' %}" class="btn-dl btn-dl--pink" id="pdf-audit">Download PDF &darr;</a>
+                </div>
+                <div class="export-card">
+                    <div>
+                        <span class="export-name">Certificate Statistics Report</span>
+                        <p class="export-desc">Aggregated certificate statistics per course in a clean PDF layout.</p>
+                    </div>
+                    <a href="{% url 'export_certificate_statistics_pdf' %}" class="btn-dl btn-dl--purple" id="pdf-cert-stats">Download PDF &darr;</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

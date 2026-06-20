@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Manage Discussions — EduFlow LMS{% endblock %}
+{% block body_class %}page-standard{% endblock %}
+
+{% block content %}
+{% include "instructor/_nav.html" %}
+
+<div class="page-wrapper" style="padding: 3rem 2rem;">
+
+    <div class="page-header">
+        <div class="page-header__left">
+            <h1 class="page-title heading-gradient">Manage Discussions</h1>
+            <p class="text-muted">Moderate student forum threads across all courses</p>
+        </div>
+        <a href="{% url 'instructor_dashboard' %}" class="btn btn-secondary" id="btn-dash">&larr; Dashboard</a>
+    </div>
+
+    <div class="card">
+        {% if threads %}
+        <div class="data-list">
+            {% for thread in threads %}
+            <div class="data-row" aria-label="Thread: {{ thread.title }}">
+                <div class="data-row__info">
+                    <span class="data-row__title">{{ thread.title }}</span>
+                    <span class="data-row__sub">
+                        <i data-lucide="book-open" class="icon-inline"></i> {{ thread.course.title|truncatechars:28 }} &bull;
+                        👤 {{ thread.author.username }} &bull;
+                        💬 {{ thread.reply_count }} repl{{ thread.reply_count|pluralize:"y,ies" }} &bull;
+                        {{ thread.updated_at|date:"M d, Y" }}
+                    </span>
+                </div>
+                <div class="data-row__actions">
+                    <a href="{% url 'thread_detail' thread.course.id thread.id %}" class="btn btn--sm btn-secondary" id="view-{{ thread.pk }}">View</a>
+                    <a href="{% url 'delete_thread' thread.id %}" class="btn btn--sm btn-danger" id="delete-{{ thread.pk }}" aria-label="Delete thread {{ thread.title }}">Delete</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <span class="empty-state__icon">💬</span>
+            <p class="empty-state__title">No discussion threads yet</p>
+            <p class="empty-state__text">Threads will appear here as students start discussions.</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

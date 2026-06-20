@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Manage Courses — EduFlow LMS{% endblock %}
+{% block body_class %}page-standard{% endblock %}
+
+{% block content %}
+{% include "instructor/_nav.html" %}
+
+<div class="page-wrapper" style="padding: 3rem 2rem;">
+
+    <div class="page-header">
+        <div class="page-header__left">
+            <h1 class="page-title heading-gradient">Manage Courses</h1>
+            <p class="text-muted">{{ courses|length }} course{{ courses|length|pluralize }} created</p>
+        </div>
+        <div class="page-header__right">
+            <a href="{% url 'create_course' %}" class="btn btn-primary" id="btn-create">+ Create Course</a>
+            <a href="{% url 'instructor_dashboard' %}" class="btn btn-secondary" id="btn-dashboard">&larr; Dashboard</a>
+        </div>
+    </div>
+
+    <div class="card">
+        {% if courses %}
+        <div class="data-list">
+            {% for course in courses %}
+            <div class="data-row" aria-label="Course: {{ course.title }}">
+                <div class="data-row__info">
+                    <span class="data-row__title">{{ course.title }}</span>
+                    <span class="data-row__sub">Created {{ course.created_at|date:"M d, Y" }}</span>
+                </div>
+                <div class="data-row__actions">
+                    <a href="{% url 'course_analytics' course.pk %}" class="btn btn--sm btn-cyan" id="analytics-{{ course.pk }}">📊 Analytics</a>
+                    <a href="{% url 'edit_course' course.pk %}" class="btn btn--sm btn-secondary" id="edit-{{ course.pk }}">Edit</a>
+                    <a href="{% url 'delete_course' course.pk %}" class="btn btn--sm btn-danger" id="delete-{{ course.pk }}" aria-label="Delete {{ course.title }}">Delete</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <span class="empty-state__icon"><i data-lucide="book-open" class="icon-inline"></i></span>
+            <p class="empty-state__title">No courses yet</p>
+            <p class="empty-state__text">Create your first course to get started.</p>
+            <a href="{% url 'create_course' %}" class="btn btn-primary" id="btn-first-course">+ Create Course</a>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

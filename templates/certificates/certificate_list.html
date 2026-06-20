@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Certificates — EduFlow LMS{% endblock %}
+{% block body_class %}page-standard{% endblock %}
+
+{% block content %}
+<div class="page-wrapper" style="padding: 3rem 2rem;">
+
+    <div class="page-header">
+        <div class="page-header__left">
+            <h1 class="page-title heading-gradient"><i data-lucide="trophy" class="icon-inline"></i> My Certificates</h1>
+            <p class="text-muted">{{ certificates|length }} certificate{{ certificates|length|pluralize }} earned</p>
+        </div>
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary" id="btn-dashboard">&larr; Dashboard</a>
+    </div>
+
+    {% if certificates %}
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+        {% for certificate in certificates %}
+        <article class="card card--hover animate-fade-in-up" aria-label="Certificate for {{ certificate.course.title }}">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem; text-align: center;"><i data-lucide="trophy" class="icon-inline"></i></div>
+            <h2 style="font-size: 1.1rem; font-weight: 600; text-align: center; margin-bottom: 0.5rem; line-height: 1.3;">
+                {{ certificate.course.title }}
+            </h2>
+            <p class="text-muted" style="text-align: center; font-size: 0.8rem; margin-bottom: 1.5rem;">
+                ID: <code style="color: var(--accent-secondary);">{{ certificate.certificate_id }}</code>
+            </p>
+            <div style="display: flex; gap: 0.5rem;">
+                <a href="{% url 'certificate_detail' certificate.certificate_id %}"
+                   class="btn btn-primary"
+                   style="flex: 1; text-align: center;"
+                   id="view-cert-{{ certificate.id }}">
+                    View Certificate &rarr;
+                </a>
+                <a href="{% url 'download_certificate' certificate.certificate_id %}"
+                   class="btn btn-secondary"
+                   id="dl-cert-{{ certificate.id }}"
+                   aria-label="Download certificate for {{ certificate.course.title }}">
+                    ↓
+                </a>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="empty-state">
+            <span class="empty-state__icon"><i data-lucide="trophy" class="icon-inline"></i></span>
+            <p class="empty-state__title">No certificates yet</p>
+            <p class="empty-state__text">Complete a course to earn your first certificate.</p>
+            <a href="{% url 'course_list' %}" class="btn btn-primary" id="btn-browse">Browse Courses</a>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

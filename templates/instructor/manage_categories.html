@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Manage Categories — EduFlow LMS{% endblock %}
+{% block body_class %}page-standard{% endblock %}
+
+{% block content %}
+{% include "instructor/_nav.html" %}
+
+<div class="page-wrapper" style="padding: 3rem 2rem;">
+
+    <div class="page-header">
+        <div class="page-header__left">
+            <h1 class="page-title heading-gradient">Manage Categories</h1>
+            <p class="text-muted">{{ categories|length }} categor{{ categories|length|pluralize:"y,ies" }}</p>
+        </div>
+        <div class="page-header__right">
+            <a href="{% url 'create_category' %}" class="btn btn-primary" id="btn-create">+ Create Category</a>
+            <a href="{% url 'instructor_dashboard' %}" class="btn btn-secondary" id="btn-dash">&larr; Dashboard</a>
+        </div>
+    </div>
+
+    <div class="card">
+        {% if categories %}
+        <div class="data-list">
+            {% for category in categories %}
+            <div class="data-row" aria-label="Category: {{ category.name }}">
+                <div class="data-row__info">
+                    <span class="data-row__title">{{ category.name }}</span>
+                    {% if category.description %}
+                    <span class="data-row__sub">{{ category.description|truncatechars:60 }}</span>
+                    {% endif %}
+                </div>
+                <div class="data-row__actions">
+                    <a href="{% url 'edit_category' category.pk %}" class="btn btn--sm btn-secondary" id="edit-{{ category.pk }}">Edit</a>
+                    <a href="{% url 'delete_category' category.pk %}" class="btn btn--sm btn-danger" id="delete-{{ category.pk }}" aria-label="Delete {{ category.name }}">Delete</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <span class="empty-state__icon">🗂️</span>
+            <p class="empty-state__title">No categories yet</p>
+            <p class="empty-state__text">Create categories to organise your courses.</p>
+            <a href="{% url 'create_category' %}" class="btn btn-primary" id="btn-first">+ Create Category</a>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

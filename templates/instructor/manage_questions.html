@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Manage Questions — {{ quiz.title }} — EduFlow LMS{% endblock %}
+{% block body_class %}page-standard{% endblock %}
+
+{% block content %}
+{% include "instructor/_nav.html" %}
+
+<div class="page-wrapper" style="padding: 3rem 2rem;">
+
+    <div class="page-header">
+        <div class="page-header__left">
+            <h1 class="page-title heading-gradient">Manage Questions</h1>
+            <p class="text-muted">Quiz: <strong>{{ quiz.title }}</strong> &bull; {{ questions|length }} question{{ questions|length|pluralize }}</p>
+        </div>
+        <div class="page-header__right">
+            <a href="{% url 'create_question' quiz.pk %}" class="btn btn-primary" id="btn-create">+ Add Question</a>
+            <a href="{% url 'manage_quizzes' %}" class="btn btn-secondary" id="btn-quizzes">&larr; Quizzes</a>
+        </div>
+    </div>
+
+    <div class="card">
+        {% if questions %}
+        <div class="data-list">
+            {% for question in questions %}
+            <div class="data-row" aria-label="Question {{ forloop.counter }}">
+                <div class="data-row__info">
+                    <span class="data-row__title" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+                        <span style="color:var(--text-muted); margin-right:0.5rem;">Q{{ forloop.counter }}.</span>
+                        {{ question.text }}
+                    </span>
+                    <span class="data-row__sub">
+                        Type: {{ question.get_question_type_display|default:question.question_type }}
+                    </span>
+                </div>
+                <div class="data-row__actions">
+                    <a href="{% url 'edit_question' question.pk %}" class="btn btn--sm btn-secondary" id="edit-{{ question.pk }}">Edit</a>
+                    <a href="{% url 'delete_question' question.pk %}" class="btn btn--sm btn-danger" id="delete-{{ question.pk }}" aria-label="Delete question {{ forloop.counter }}">Delete</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <span class="empty-state__icon">❓</span>
+            <p class="empty-state__title">No questions yet</p>
+            <p class="empty-state__text">Add your first question to this quiz.</p>
+            <a href="{% url 'create_question' quiz.pk %}" class="btn btn-primary" id="btn-first">+ Add Question</a>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

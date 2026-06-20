@@ -1,0 +1,403 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ material.title }} — EduFlow LMS{% endblock %}
+{% block meta_description %}Lesson {{ material.order }}: {{ material.title }} — {{ material.course.title }}{% endblock %}
+{% block body_class %}page-centered{% endblock %}
+
+{% block extra_css %}
+<style>
+  .material-wrap {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 780px;
+    padding: 2rem 1rem;
+  }
+  .material-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    border-radius: 28px;
+    padding: 3.5rem;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    animation: fadeInUp 0.5s cubic-bezier(0.16,1,0.3,1);
+  }
+  .material-content {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: var(--text-subtle);
+    margin: 2rem 0 2.5rem;
+    white-space: pre-line;
+  }
+  .attachment-section {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+  .attachment-item { display: flex; flex-direction: column; gap: 0.5rem; }
+  .attachment-item + .attachment-item { padding-top: 1.25rem; margin-top: 1.25rem; border-top: 1px solid rgba(255,255,255,0.05); }
+  .attachment-label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+  .attachment-link {
+    color: var(--accent-secondary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+  }
+  .attachment-link:hover { color: #fff; }
+  .lesson-nav {
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  @media (max-width: 480px) {
+    .material-card { padding: 2rem 1.5rem; border-radius: 20px; }
+  }
+  
+  /* --- AI Assistant UI --- */
+  .ai-fab {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 60px;
+      height: 60px;
+      border-radius: 30px;
+      background: linear-gradient(135deg, var(--accent-gold), #FBBF24);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 25px rgba(212,175,55,0.4);
+      cursor: pointer;
+      z-index: 1000;
+      transition: all 0.3s;
+      border: none;
+  }
+  .ai-fab:hover { transform: scale(1.05); box-shadow: 0 12px 30px rgba(212,175,55,0.5); }
+  
+  .ai-panel {
+      position: fixed;
+      bottom: 6rem;
+      right: 2rem;
+      width: 380px;
+      max-height: 600px;
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(15,23,42,0.15);
+      z-index: 999;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      transform-origin: bottom right;
+      animation: popIn 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  .ai-panel.active { display: flex; }
+  
+  @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.9) translateY(20px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  
+  .ai-header {
+      background: var(--accent-primary);
+      color: #fff;
+      padding: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+  }
+  .ai-header h3 { font-size: 1.1rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem; }
+  .ai-close { background: none; border: none; color: #fff; cursor: pointer; font-size: 1.25rem; opacity: 0.8; }
+  .ai-close:hover { opacity: 1; }
+  
+  .ai-body {
+      padding: 1.25rem;
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      background: #F8FAFC;
+  }
+  
+  .ai-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+  }
+  .ai-btn {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent-primary);
+      cursor: pointer;
+      transition: all 0.2s;
+      flex: 1 1 auto;
+      text-align: center;
+  }
+  .ai-btn:hover { background: var(--accent-primary); color: #fff; border-color: var(--accent-primary); }
+  
+  .ai-message {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      padding: 1rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      line-height: 1.6;
+  }
+  .ai-message.system { background: transparent; border: none; font-size: 0.85rem; color: var(--text-muted); text-align: center; }
+  
+  .ai-footer {
+      padding: 1rem;
+      background: #FFFFFF;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 0.5rem;
+  }
+  .ai-input {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+      outline: none;
+  }
+  .ai-input:focus { border-color: var(--accent-primary); }
+  .ai-send {
+      background: var(--accent-primary);
+      color: #fff;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="material-wrap">
+    <div class="material-card">
+        <span class="badge badge-navy" style="margin-bottom: 1.5rem;">Lesson {{ material.order }}</span>
+        <h1 style="font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.2; margin-bottom: 0.5rem;"
+            class="heading-gradient">{{ material.title }}</h1>
+        <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 0.25rem;">
+            Course: <strong>{{ material.course.title }}</strong>
+        </p>
+
+        <div class="divider"></div>
+
+        <div class="material-content" aria-label="Lesson content">
+            {{ material.content }}
+        </div>
+
+        {% if material.video_url or material.file %}
+        <div class="attachment-section" aria-label="Attachments">
+            {% if material.video_url %}
+            <div class="attachment-item">
+                <span class="attachment-label">🎥 Video Lecture</span>
+                <a href="{{ material.video_url }}" target="_blank" rel="noopener noreferrer" class="attachment-link" id="link-video">
+                    Watch Video Tutorial &rarr;
+                </a>
+            </div>
+            {% endif %}
+            {% if material.file %}
+            <div class="attachment-item">
+                <span class="attachment-label">📁 Downloadable Resource</span>
+                <a href="{{ material.file.url }}" class="attachment-link" id="link-file" download>
+                    Download Lecture Material &darr;
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <a href="{% url 'course_detail' material.course.id %}" class="btn btn-secondary" id="btn-back">
+            &larr; Back to Course
+        </a>
+
+        <!-- Discussions Section -->
+        <div class="material-card" style="margin-top: 2rem;" id="discussions-section">
+            <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="message-circle" style="color: var(--accent-primary);"></i> Lesson Discussions</h2>
+            
+            <form method="POST" action="{% url 'material_detail' material.id %}#discussions-section" style="margin-bottom: 2rem;">
+                {% csrf_token %}
+                <div class="form-group">
+                    <input type="text" name="title" class="form-control" placeholder="What's your question or insight?" required style="margin-bottom: 1rem;">
+                    <textarea name="content" class="form-control" rows="3" placeholder="Add more details..." required></textarea>
+                </div>
+                <div style="display: flex; justify-content: flex-end;">
+                    <button type="submit" class="btn btn-primary">Post Discussion</button>
+                </div>
+            </form>
+
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                {% for thread in threads %}
+                    <a href="{% url 'thread_detail' thread.id %}" style="display: block; text-decoration: none; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 16px; padding: 1.5rem; transition: transform 0.2s, box-shadow 0.2s;" class="thread-card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                            <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin: 0;">{{ thread.title }}</h3>
+                            <span class="badge badge-navy" style="font-size: 0.75rem;"><i data-lucide="message-square" style="width: 12px; margin-right: 4px;"></i> {{ thread.replies_count }}</span>
+                        </div>
+                        <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.5;">{{ thread.content|truncatechars:120 }}</p>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
+                            <div style="width: 24px; height: 24px; border-radius: 12px; background: var(--accent-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.7rem;">
+                                {{ thread.author.username|make_list|first|upper }}
+                            </div>
+                            <span><strong>{{ thread.author.username }}</strong> • {{ thread.updated_at|timesince }} ago</span>
+                        </div>
+                    </a>
+                {% empty %}
+                    <div class="empty-state" style="padding: 2rem; text-align: center; background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 16px;">
+                        <i data-lucide="message-circle" style="width: 48px; height: 48px; color: #CBD5E1; margin-bottom: 1rem;"></i>
+                        <h3 style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">No Discussions Yet</h3>
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">Be the first to share an insight or ask a question about this lesson.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="lesson-nav">
+            {% if previous_material %}
+                <a href="{% url 'material_detail' previous_material.id %}" class="btn btn-secondary">&larr; Previous Lesson</a>
+            {% else %}
+                <div></div>
+            {% endif %}
+            
+            {% if next_material %}
+                <a href="{% url 'material_detail' next_material.id %}" class="btn btn-primary">Next Lesson &rarr;</a>
+            {% else %}
+                <a href="{% url 'course_detail' material.course.id %}" class="btn btn-primary">Back to Course</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- AI Assistant Widget -->
+<button class="ai-fab" id="aiToggleBtn" aria-label="Open AI Assistant">
+    <i data-lucide="sparkles"></i>
+</button>
+
+<div class="ai-panel" id="aiPanel">
+    <div class="ai-header">
+        <h3><i data-lucide="sparkles" style="width:18px;"></i> EduFlow AI</h3>
+        <button class="ai-close" id="aiCloseBtn">&times;</button>
+    </div>
+    
+    <div class="ai-body" id="aiChatWindow">
+        <div class="ai-message system">
+            I am your contextual learning assistant. How can I help you with <strong>{{ material.title }}</strong>?
+        </div>
+        
+        <div class="ai-actions" id="aiQuickActions">
+            <button class="ai-btn" onclick="askAI('Summarize Lesson')">Summarize Lesson</button>
+            <button class="ai-btn" onclick="askAI('Explain This Concept')">Explain Concept</button>
+            <button class="ai-btn" onclick="askAI('Generate Notes')">Generate Notes</button>
+            <button class="ai-btn" onclick="askAI('Quiz Me')">Quiz Me</button>
+        </div>
+    </div>
+    
+    <div class="ai-footer">
+        <input type="text" id="aiCustomInput" class="ai-input" placeholder="Ask about this lesson...">
+        <button class="ai-send" onclick="submitCustomPrompt()">
+            <i data-lucide="send" style="width: 14px;"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+    const aiToggleBtn = document.getElementById('aiToggleBtn');
+    const aiCloseBtn = document.getElementById('aiCloseBtn');
+    const aiPanel = document.getElementById('aiPanel');
+    const aiChatWindow = document.getElementById('aiChatWindow');
+    const aiCustomInput = document.getElementById('aiCustomInput');
+    const materialId = "{{ material.id }}";
+    
+    aiToggleBtn.addEventListener('click', () => {
+        aiPanel.classList.toggle('active');
+    });
+    
+    aiCloseBtn.addEventListener('click', () => {
+        aiPanel.classList.remove('active');
+    });
+    
+    aiCustomInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') submitCustomPrompt();
+    });
+    
+    function submitCustomPrompt() {
+        const val = aiCustomInput.value.trim();
+        if (!val) return;
+        aiCustomInput.value = '';
+        askAI('Ask About This Lesson', val);
+    }
+    
+    function appendMessage(text, isUser=false) {
+        const div = document.createElement('div');
+        div.className = 'ai-message' + (isUser ? ' user' : '');
+        div.style.background = isUser ? 'var(--accent-primary)' : '#FFFFFF';
+        div.style.color = isUser ? '#FFFFFF' : 'var(--text-primary)';
+        div.style.alignSelf = isUser ? 'flex-end' : 'flex-start';
+        div.innerText = text;
+        aiChatWindow.appendChild(div);
+        aiChatWindow.scrollTop = aiChatWindow.scrollHeight;
+    }
+    
+    async function askAI(action, promptText="") {
+        // Hide quick actions on first ask
+        const qa = document.getElementById('aiQuickActions');
+        if(qa) qa.style.display = 'none';
+        
+        appendMessage(promptText || action, true);
+        
+        // Show loading
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'ai-message system';
+        loadingDiv.innerText = "Thinking...";
+        loadingDiv.id = "aiLoading";
+        aiChatWindow.appendChild(loadingDiv);
+        aiChatWindow.scrollTop = aiChatWindow.scrollHeight;
+        
+        try {
+            const res = await fetch('/api/ai/ask/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    material_id: materialId,
+                    action: action,
+                    prompt: promptText
+                })
+            });
+            const data = await res.json();
+            
+            document.getElementById('aiLoading').remove();
+            
+            if (data.error) {
+                appendMessage("Error: " + data.error);
+            } else {
+                appendMessage(data.response);
+            }
+            
+        } catch (err) {
+            document.getElementById('aiLoading').remove();
+            appendMessage("Failed to connect to AI server.");
+        }
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Manage Quizzes — EduFlow LMS{% endblock %}
+{% block body_class %}page-standard{% endblock %}
+
+{% block content %}
+{% include "instructor/_nav.html" %}
+
+<div class="page-wrapper" style="padding: 3rem 2rem;">
+
+    <div class="page-header">
+        <div class="page-header__left">
+            <h1 class="page-title heading-gradient">Manage Quizzes</h1>
+            <p class="text-muted">{{ quizzes|length }} quiz{{ quizzes|length|pluralize:"zes" }}</p>
+        </div>
+        <div class="page-header__right">
+            <a href="{% url 'create_quiz' %}" class="btn btn-primary" id="btn-create">+ Create Quiz</a>
+            <a href="{% url 'instructor_dashboard' %}" class="btn btn-secondary" id="btn-dash">&larr; Dashboard</a>
+        </div>
+    </div>
+
+    <div class="card">
+        {% if quizzes %}
+        <div class="data-list">
+            {% for quiz in quizzes %}
+            <div class="data-row" aria-label="Quiz: {{ quiz.title }}">
+                <div class="data-row__info">
+                    <span class="data-row__title">{{ quiz.title }}</span>
+                    <span class="data-row__sub">
+                        Course: {{ quiz.course.title|truncatechars:30 }} &bull;
+                        Passing: {{ quiz.passing_score }}%
+                    </span>
+                </div>
+                <div class="data-row__actions">
+                    <a href="{% url 'manage_questions' quiz.pk %}" class="btn btn--sm btn-cyan" id="questions-{{ quiz.pk }}">Questions</a>
+                    <a href="{% url 'edit_quiz' quiz.pk %}" class="btn btn--sm btn-secondary" id="edit-{{ quiz.pk }}">Edit</a>
+                    <a href="{% url 'delete_quiz' quiz.pk %}" class="btn btn--sm btn-danger" id="delete-{{ quiz.pk }}" aria-label="Delete {{ quiz.title }}">Delete</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <span class="empty-state__icon"><i data-lucide="clipboard-list" class="icon-inline"></i></span>
+            <p class="empty-state__title">No quizzes yet</p>
+            <p class="empty-state__text">Create your first quiz and attach it to a course.</p>
+            <a href="{% url 'create_quiz' %}" class="btn btn-primary" id="btn-first">+ Create Quiz</a>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

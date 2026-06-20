@@ -1,0 +1,12 @@
+<div class="empty-state" {% if style %}style="{{ style }}"{% endif %}>
+    <div class="empty-state__icon">
+        <i data-lucide="{{ icon|default:'inbox' }}" style="width: 48px; height: 48px; color: var(--border);"></i>
+    </div>
+    <h3 class="empty-state__title">{{ title }}</h3>
+    <p class="empty-state__desc">{{ description }}</p>
+    {% if action_url and action_text %}
+        <a href="{{ action_url }}" class="btn btn-primary" style="margin-top: 0.5rem;">
+            {% if action_icon %}<i data-lucide="{{ action_icon }}"></i>{% endif %} {{ action_text }}
+        </a>
+    {% endif %}
+</div>

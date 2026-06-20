@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Manage Tags — EduFlow LMS{% endblock %}
+{% block body_class %}page-standard{% endblock %}
+
+{% block content %}
+{% include "instructor/_nav.html" %}
+
+<div class="page-wrapper" style="padding: 3rem 2rem;">
+
+    <div class="page-header">
+        <div class="page-header__left">
+            <h1 class="page-title heading-gradient">Manage Tags</h1>
+            <p class="text-muted">{{ tags|length }} tag{{ tags|length|pluralize }}</p>
+        </div>
+        <div class="page-header__right">
+            <a href="{% url 'create_tag' %}" class="btn btn-primary" id="btn-create">+ Create Tag</a>
+            <a href="{% url 'instructor_dashboard' %}" class="btn btn-secondary" id="btn-dash">&larr; Dashboard</a>
+        </div>
+    </div>
+
+    <div class="card">
+        {% if tags %}
+        <div class="data-list">
+            {% for tag in tags %}
+            <div class="data-row" aria-label="Tag: {{ tag.name }}">
+                <div class="data-row__info">
+                    <span class="data-row__title">
+                        <span class="tag-chip" style="font-size: 0.9rem; padding: 0.3rem 0.75rem;">{{ tag.name }}</span>
+                    </span>
+                </div>
+                <div class="data-row__actions">
+                    <a href="{% url 'edit_tag' tag.pk %}" class="btn btn--sm btn-secondary" id="edit-{{ tag.pk }}">Edit</a>
+                    <a href="{% url 'delete_tag' tag.pk %}" class="btn btn--sm btn-danger" id="delete-{{ tag.pk }}" aria-label="Delete tag {{ tag.name }}">Delete</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <span class="empty-state__icon">🏷️</span>
+            <p class="empty-state__title">No tags yet</p>
+            <p class="empty-state__text">Tags help students discover courses by topic.</p>
+            <a href="{% url 'create_tag' %}" class="btn btn-primary" id="btn-first">+ Create Tag</a>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

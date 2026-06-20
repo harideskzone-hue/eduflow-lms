@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}<i data-lucide="trophy" class="icon-inline"></i> Certificate Earned — {{ certificate.course.title }} — EduFlow LMS{% endblock %}
+{% block body_class %}page-centered{% endblock %}
+
+{% block extra_css %}
+<style>
+  .success-wrap {
+    position: relative; z-index: 2;
+    width: 100%; max-width: 600px;
+    padding: 3rem 1rem;
+    margin: 0 auto;
+  }
+  .success-card {
+    background: #FFFFFF;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 4rem 3rem;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.06), 0 0 80px rgba(212,175,55,0.08);
+    animation: scaleIn 0.5s cubic-bezier(0.16,1,0.3,1);
+  }
+  .success-badge {
+    background: rgba(212,175,55,0.1);
+    color: var(--accent-gold);
+    border: 1px solid rgba(212,175,55,0.25);
+    font-size: 0.9rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; padding: 0.5rem 1.25rem;
+    border-radius: 12px; display: inline-block;
+    margin-bottom: 2rem;
+  }
+  .success-title { font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 0.75rem; color: var(--accent-primary); }
+  .success-subtitle { font-size: 1.1rem; color: var(--text-muted); font-weight: 500; margin-bottom: 2.5rem; }
+  
+  .reward-box {
+    background: #F8FAFC; border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem;
+    margin-bottom: 3rem; display: flex; flex-direction: column; gap: 1rem;
+  }
+  
+  .reward-item {
+    display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+    font-size: 1.25rem; font-weight: 700; color: var(--text-primary);
+    animation: slideUpFade 0.6s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  
+  .reward-item:nth-child(1) { animation-delay: 0.2s; }
+  .reward-item:nth-child(2) { animation-delay: 0.4s; }
+  .reward-item:nth-child(3) { animation-delay: 0.6s; }
+  
+  .xp-text { color: var(--success); font-family: monospace; font-size: 1.4rem; }
+  .level-text { color: var(--accent-primary); }
+  
+  .success-actions {
+    display: flex; flex-direction: column; gap: 0.85rem;
+  }
+  
+  @keyframes slideUpFade {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="success-wrap">
+    <div class="success-card" role="main" aria-label="Certificate Earned Celebration">
+        <span class="success-badge"><i data-lucide="award" class="icon-inline"></i> Course Completed</span>
+        <h1 class="success-title">{{ certificate.course.title }}</h1>
+        <p class="success-subtitle">
+            Awarded for successful completion of all requirements.
+        </p>
+
+        <div class="reward-box">
+            <div class="reward-item">
+                <i data-lucide="zap" style="color: var(--success);"></i>
+                <span class="xp-text">+100 XP</span>
+            </div>
+            
+            {% if request.user.certificates.count == 1 %}
+            <div class="reward-item" style="color: var(--accent-gold);">
+                <i data-lucide="trophy"></i>
+                <span>First Certificate Unlocked</span>
+            </div>
+            {% endif %}
+            
+            <div class="reward-item level-text">
+                <i data-lucide="arrow-up-circle"></i>
+                <span>Level {{ request.user.profile.level }} Reached</span>
+            </div>
+        </div>
+
+        <div class="success-actions">
+            <a href="{% url 'certificate_detail' certificate.certificate_id %}" class="btn btn-primary btn--lg" style="width: 100%;">
+                View Certificate &rarr;
+            </a>
+            <a href="{% url 'download_certificate' certificate.certificate_id %}" class="btn btn-secondary btn--lg" style="width: 100%;">
+                Download Certificate &darr;
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

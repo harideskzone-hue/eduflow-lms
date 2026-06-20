@@ -1,0 +1,41 @@
+<!-- templates/components/_stats_bar.html -->
+<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+    <!-- Level -->
+    <div style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; text-align: center; display: flex; flex-direction: column; justify-content: center;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Level</span>
+        <strong style="font-size: 2.25rem; font-weight: 800; color: #0F172A; line-height: 1;">{{ request.user.profile.level|default:1 }}</strong>
+    </div>
+
+    <!-- XP -->
+    <div style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; text-align: center; display: flex; flex-direction: column; justify-content: center;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">XP</span>
+        <strong style="font-size: 2.25rem; font-weight: 800; color: #0F172A; line-height: 1;">{{ request.user.profile.xp|default:0 }}</strong>
+    </div>
+
+    <!-- Streak -->
+    <div style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; text-align: center; display: flex; flex-direction: column; justify-content: center;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Streak</span>
+        <div style="display: flex; align-items: baseline; justify-content: center; gap: 0.25rem;">
+            <strong style="font-size: 2.25rem; font-weight: 800; color: #0F172A; line-height: 1;">{{ request.user.profile.streak_days|default:0 }}</strong>
+            <span style="font-size: 1rem; font-weight: 700; color: #64748B;">Day</span>
+        </div>
+    </div>
+
+    <!-- Hours -->
+    <div style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; text-align: center; display: flex; flex-direction: column; justify-content: center;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Hours</span>
+        <strong style="font-size: 2.25rem; font-weight: 800; color: #0F172A; line-height: 1;">
+            {% if request.user.profile.learning_minutes|default:0 >= 60 %}
+                {% widthratio request.user.profile.learning_minutes|default:0 60 1 %}
+            {% else %}
+                0
+            {% endif %}
+        </strong>
+    </div>
+
+    <!-- Certificates -->
+    <div style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; text-align: center; display: flex; flex-direction: column; justify-content: center;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Certs</span>
+        <strong style="font-size: 2.25rem; font-weight: 800; color: #0F172A; line-height: 1;">{{ request.user.certificates.count|default:0 }}</strong>
+    </div>
+</div>

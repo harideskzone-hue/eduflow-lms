@@ -1,0 +1,671 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if is_admin %}Admin Dashboard{% else %}My Dashboard{% endif %} — EduFlow LMS{% endblock %}
+{% block body_class %}page-dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Dashboard nav ── */
+  .dash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2.5rem;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-bottom: 1px solid #E2E8F0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .dash-header__left { display: flex; align-items: center; gap: 2.5rem; }
+  .dash-nav { display: flex; gap: 0.25rem; align-items: center; }
+  .dash-nav a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.45rem 0.875rem;
+    border-radius: 8px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .dash-nav a:hover { color: var(--text-primary); background: rgba(255,255,255,0.05); }
+  .dash-header__right { display: flex; align-items: center; gap: 1.25rem; }
+  .user-pill {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 0.4rem 0.875rem;
+    border-radius: 999px;
+    font-size: 0.825rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  /* ── Main layout ── */
+  .dash-main { padding: 2.5rem; max-width: 1300px; margin: 0 auto; }
+
+  /* ── Student welcome ── */
+  .welcome-section { margin-bottom: 2.5rem; }
+  .welcome-section h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; color: #0F172A; }
+  .welcome-section h1 span {
+    color: #2563EB;
+  }
+  .welcome-section p { color: #64748B; margin-top: 0.4rem; }
+
+  /* ── Enrolled course card ── */
+  .course-progress-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 18px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(15,23,42,.04), 0 12px 24px rgba(15,23,42,.06);
+    transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .course-progress-card:hover {
+    transform: translateY(-3px);
+    border-color: #2563EB;
+    box-shadow: 0 16px 40px rgba(15,23,42,.12);
+  }
+  .course-progress-card h3 { font-size: 1.05rem; font-weight: 600; color: #0F172A; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.4rem; }
+  .btn-continue {
+    display: inline-block;
+    padding: 0.6rem 1.25rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    align-self: flex-start;
+    margin-top: 0.25rem;
+  }
+  .btn-continue:hover {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    border-color: transparent;
+    color: var(--text-primary);
+  }
+
+  /* ── Activity ── */
+  .activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-dot {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .activity-dot--enroll { background: rgba(6,182,212,0.15); }
+  .activity-dot--complete { background: rgba(16,185,129,0.15); }
+  .activity-info { display: flex; flex-direction: column; gap: 0.15rem; }
+  .activity-text { font-size: 0.9rem; font-weight: 500; }
+  .activity-date { font-size: 0.775rem; color: var(--text-muted); }
+  .no-data { color: var(--text-muted); font-size: 0.9rem; }
+
+  /* ── Recommended ── */
+  .rec-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem;
+  }
+  .rec-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(15,23,42,.04), 0 12px 24px rgba(15,23,42,.06);
+    transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .rec-card:hover {
+    transform: translateY(-3px);
+    border-color: #2563EB;
+    box-shadow: 0 16px 40px rgba(15,23,42,.12);
+  }
+  .rec-card h3 { font-size: 0.975rem; font-weight: 600; }
+  .rec-card h3 a { color: var(--text-primary); text-decoration: none; }
+  .rec-card h3 a:hover { color: var(--accent-secondary); }
+  .rec-card p { color: var(--text-muted); font-size: 0.83rem; line-height: 1.5; }
+
+  /* ── Admin-specific ── */
+  .top-course-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .top-course-row:last-child { border-bottom: none; }
+  .top-course-name { flex: 1; font-size: 0.9rem; font-weight: 500; }
+  .top-course-rate { font-size: 0.85rem; font-weight: 700; color: var(--accent-cyan); min-width: 40px; text-align: right; }
+
+  .quick-action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+  }
+  .quick-action {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 1.25rem;
+    text-decoration: none;
+    color: #0F172A;
+    text-align: center;
+    font-size: 0.875rem;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(15,23,42,.04);
+    transition: all 0.25s cubic-bezier(0.16,1,0.3,1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .quick-action:hover {
+    border-color: #2563EB;
+    background: #F8FAFC;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(15,23,42,.08);
+    color: #2563EB;
+  }
+  .quick-action .icon { font-size: 1.5rem; }
+
+  @media (max-width: 768px) {
+    .dash-nav { display: none; }
+    .dash-main { padding: 1.25rem; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+
+
+<!-- Mobile Nav Drawer -->
+<nav class="nav-drawer" id="nav-drawer" aria-label="Mobile navigation">
+    <button class="nav-drawer__close" onclick="closeNavDrawer()" aria-label="Close navigation">×</button>
+    {% if is_admin %}
+    <a href="{% url 'instructor_dashboard' %}">Instructor Portal</a>
+    <a href="{% url 'monitoring_dashboard' %}">Monitoring</a>
+    <a href="{% url 'reports_dashboard' %}">Reports</a>
+    {% else %}
+    <a href="{% url 'dashboard' %}">Dashboard</a>
+    <a href="{% url 'course_list' %}">Browse Courses</a>
+    <a href="{% url 'my_courses' %}">My Courses</a>
+    <a href="{% url 'certificate_list' %}">Certificates</a>
+    {% endif %}
+    <a href="{% url 'notification_list' %}">Notifications {% if unread_notifications %}({{ unread_notifications }}){% endif %}</a>
+    <a href="{% url 'profile' %}">Profile</a>
+</nav>
+
+<!-- ── Dashboard Main ─────────────────────────────── -->
+<main class="dash-main" id="main-content">
+
+  {% if is_admin %}
+  <!-- ===== ADMIN DASHBOARD ===== -->
+  <div class="welcome-section">
+      <h1 class="heading-gradient">Admin Dashboard</h1>
+      <p>Platform overview and management tools</p>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid" role="region" aria-label="Platform statistics">
+    <div class="stat-card">
+      <p class="stat-label">👥 Total Students</p>
+      <p class="stat-value">{{ total_students }}</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label"><i data-lucide="book-open" class="icon-inline"></i> Total Courses</p>
+      <p class="stat-value">{{ total_courses }}</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">📋 Enrollments</p>
+      <p class="stat-value">{{ total_enrollments }}</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label"><i data-lucide="trophy" class="icon-inline"></i> Certificates</p>
+      <p class="stat-value">{{ total_certificates }}</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label"><i data-lucide="clipboard-list" class="icon-inline"></i> Quiz Attempts</p>
+      <p class="stat-value">{{ total_quiz_attempts }}</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">✅ Completion Rate</p>
+      <p class="stat-value">{{ completion_rate }}%</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label"><i data-lucide="star" class="icon-inline"></i> Avg Score</p>
+      <p class="stat-value">{{ average_score }}%</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">🎯 Pass Rate</p>
+      <p class="stat-value">{{ pass_rate }}%</p>
+    </div>
+  </div>
+
+  <!-- Two-col layout -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+
+    <!-- Top Courses -->
+    <div class="card">
+      <h2 class="section-title"><i data-lucide="trophy" class="icon-inline"></i> Top Performing Courses</h2>
+      <div>
+        {% for course in top_courses %}
+        <div class="top-course-row">
+          <span class="top-course-name">{{ course.title|truncatechars:35 }}</span>
+          <div style="flex:1; margin: 0 1rem;">
+            <div class="progress-wrap" role="progressbar" aria-valuenow="{{ course.completion_rate }}" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-fill" style="width: {{ course.completion_rate }}%"></div>
+            </div>
+          </div>
+          <span class="top-course-rate">{{ course.completion_rate }}%</span>
+        </div>
+        {% empty %}
+        <p class="no-data">No course data yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Recent Enrollments -->
+    <div class="card">
+      <h2 class="section-title">📋 Recent Enrollments</h2>
+      <div>
+        {% for e in latest_enrollments %}
+        <div class="data-row">
+          <div class="data-row__info">
+            <span class="data-row__title">{{ e.student.username }}</span>
+            <span class="data-row__sub">{{ e.course.title|truncatechars:30 }}</span>
+          </div>
+          <span class="badge badge-blue">{{ e.enrolled_at|date:"M d" }}</span>
+        </div>
+        {% empty %}
+        <p class="no-data">No enrollments yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Announcements row -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+    <div class="card">
+      <h2 class="section-title">📣 Announcements</h2>
+      <div class="stats-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 0;">
+        <div class="stat-card">
+          <p class="stat-label">Total</p>
+          <p class="stat-value">{{ total_announcements }}</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">Published</p>
+          <p class="stat-value">{{ published_announcements }}</p>
+        </div>
+      </div>
+      <a href="{% url 'manage_announcements' %}" class="btn btn-secondary" style="margin-top: 1.25rem; width: 100%;">Manage Announcements</a>
+    </div>
+
+    <!-- Latest Quiz Attempts -->
+    <div class="card">
+      <h2 class="section-title"><i data-lucide="clipboard-list" class="icon-inline"></i> Recent Quiz Attempts</h2>
+      {% for qa in latest_quiz_attempts %}
+      <div class="data-row">
+        <div class="data-row__info">
+          <span class="data-row__title">{{ qa.student.username }}</span>
+          <span class="data-row__sub">{{ qa.quiz.title|truncatechars:28 }}</span>
+        </div>
+        {% if qa.passed %}
+        <span class="badge badge-green">{{ qa.score }}% ✓</span>
+        {% else %}
+        <span class="badge badge-red">{{ qa.score }}% ✗</span>
+        {% endif %}
+      </div>
+      {% empty %}
+      <p class="no-data">No quiz attempts yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="card" style="margin-bottom: 2rem;">
+    <h2 class="section-title">⚡ Quick Actions</h2>
+    <div class="quick-action-grid" role="navigation" aria-label="Admin quick actions">
+      <a href="{% url 'instructor_dashboard' %}" class="quick-action" id="qa-instructor"><span class="icon">🎓</span>Instructor Portal</a>
+      <a href="{% url 'monitoring_dashboard' %}" class="quick-action" id="qa-monitoring"><span class="icon">📊</span>Monitoring</a>
+      <a href="{% url 'reports_dashboard' %}" class="quick-action" id="qa-reports"><span class="icon">📈</span>Reports</a>
+      <a href="{% url 'course_list' %}" class="quick-action" id="qa-courses"><span class="icon"><i data-lucide="book-open" class="icon-inline"></i></span>Browse Courses</a>
+      <a href="/admin/" class="quick-action" id="qa-admin"><span class="icon">⚙️</span>Django Admin</a>
+    </div>
+  </div>
+
+  {% else %}
+  <!-- ===== STUDENT DASHBOARD (P1.2) ===== -->
+  <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 3.5rem 3rem; margin-bottom: 3rem; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); overflow: hidden; position: relative;">
+      
+      <!-- Decorative Background Glow -->
+      <div style="position: absolute; top: -50px; right: -50px; width: 300px; height: 300px; background: rgba(37,99,235,0.05); filter: blur(60px); border-radius: 50%; pointer-events: none;"></div>
+      
+      <div style="flex: 1; position: relative; z-index: 1;">
+          <h1 style="font-size: 2.75rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; color: var(--text-primary);">
+              Welcome back, {{ request.user.username }}
+          </h1>
+          
+          {% if request.user.profile.career_goal %}
+          <div style="margin-bottom: 2.5rem; display: flex; align-items: center; gap: 1rem; background: rgba(255,255,255,0.5); padding: 0.75rem 1.25rem; border-radius: 12px; border: 1px solid var(--border); max-width: max-content;">
+              <span class="badge badge-gold" style="font-size: 0.8rem;">Target</span>
+              <span style="font-weight: 700; color: var(--text-primary);">{{ request.user.profile.career_goal }}</span>
+              <div style="width: 100px; height: 6px; background: #E2E8F0; border-radius: 3px; overflow: hidden;">
+                  <div style="width: {{ request.user.profile.goal_progress }}%; height: 100%; background: var(--accent-gold);"></div>
+              </div>
+              <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">{{ request.user.profile.goal_progress }}%</span>
+          </div>
+          {% else %}
+          <p style="font-size: 1.15rem; color: var(--text-muted); margin-bottom: 2.5rem;">Ready to reach your next career milestone?</p>
+          {% endif %}
+          
+          <!-- AI Coach Premium Insight -->
+          {% if ai_coach_message %}
+          <div style="background: linear-gradient(145deg, #1e293b, #0f172a); border-radius: 16px; padding: 1.5rem 2rem; margin-bottom: 2.5rem; display: flex; gap: 1.5rem; align-items: flex-start; box-shadow: 0 10px 30px rgba(15,23,42,0.15); border: 1px solid rgba(255,255,255,0.05);">
+              <div style="background: rgba(212,175,55,0.15); padding: 0.75rem; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                  <i data-lucide="sparkles" style="color: var(--accent-gold); width: 24px; height: 24px;"></i>
+              </div>
+              <div style="flex: 1;">
+                  <h4 style="color: var(--accent-gold); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">AI Learning Coach</h4>
+                  <p style="color: #F8FAFC; font-size: 1.05rem; line-height: 1.6; margin-bottom: 0;">{{ ai_coach_message }}</p>
+              </div>
+          </div>
+          {% endif %}
+          
+          <!-- Career Dashboard Path Status -->
+          {% if path_progress %}
+              <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 20px; padding: 2rem; max-width: 800px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02);">
+                  <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1rem;">
+                      <span class="badge badge-navy"><i data-lucide="map" class="icon-inline"></i> Career Path</span>
+                      <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">Next Milestone: {% if next_lesson %}{{ next_lesson.title }}{% else %}Complete Module{% endif %}</span>
+                  </div>
+                  
+                  <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--text-primary);">{{ path_progress.learning_path.title }}</h2>
+                  
+                  <div style="margin-bottom: 2rem;">
+                      <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.6rem; font-weight: 600;">
+                          <span>Path Progress</span>
+                          <span style="color: var(--accent-primary);">{{ path_progress.completion_percent }}% Complete</span>
+                      </div>
+                      <div class="progress-container" style="height: 10px;">
+                          <div class="progress-bar" style="width: {{ path_progress.completion_percent }}%;"></div>
+                      </div>
+                  </div>
+                  
+                  <!-- Skills Split -->
+                  <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+                      <div style="flex: 1;">
+                          <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.75rem;">Skills Acquired</h4>
+                          <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                              {% for skill in skills_acquired %}
+                                  <span class="badge badge-green">{{ skill.name|default:skill }}</span>
+                              {% empty %}
+                                  <span style="font-size: 0.85rem; color: var(--text-muted);">No skills acquired yet.</span>
+                              {% endfor %}
+                          </div>
+                      </div>
+                      <div style="flex: 1;">
+                          <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.75rem;">Skills Remaining</h4>
+                          <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                              {% for skill in skills_remaining %}
+                                  <span class="badge" style="background: #E2E8F0; color: var(--text-secondary);">{{ skill.name|default:skill }}</span>
+                              {% empty %}
+                                  <span style="font-size: 0.85rem; color: var(--text-muted);">All path skills acquired!</span>
+                              {% endfor %}
+                          </div>
+                      </div>
+                  </div>
+                  
+                  <div style="display: flex; gap: 1rem;">
+                      {% if next_lesson %}
+                      <a href="{% url 'course_detail' next_lesson.course.id %}" class="btn btn-primary btn--lg">Continue Learning &rarr;</a>
+                      {% endif %}
+                      <a href="{% url 'my_courses' %}" class="btn btn-secondary btn--lg">View Full Path</a>
+                  </div>
+              </div>
+          {% else %}
+              <!-- Fallback to original layout if no Path is active -->
+              {% if my_courses %}
+                  {% with active_course=my_courses|first %}
+                  <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 20px; padding: 2rem; max-width: 650px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02);">
+                      <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1rem;">
+                          <span class="badge badge-navy"><i data-lucide="play-circle" class="icon-inline"></i> Continue Learning</span>
+                          <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">Next Milestone: Complete Course</span>
+                      </div>
+                      
+                      <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--text-primary);">{{ active_course.course.title }}</h2>
+                      
+                      <div style="margin-bottom: 2rem;">
+                          <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.6rem; font-weight: 600;">
+                              <span>Overall Progress</span>
+                              <span style="color: var(--accent-primary);">{% if active_course.total_materials > 0 %}{% widthratio active_course.completed_materials active_course.total_materials 100 %}{% else %}0{% endif %}% Complete</span>
+                          </div>
+                          <div class="progress-container" style="height: 10px;">
+                              <div class="progress-bar" style="width: {% if active_course.total_materials > 0 %}{% widthratio active_course.completed_materials active_course.total_materials 100 %}{% else %}0{% endif %}%;"></div>
+                          </div>
+                      </div>
+                      
+                      <div style="display: flex; gap: 1rem;">
+                          <a href="{% url 'course_detail' active_course.course.id %}" class="btn btn-primary btn--lg">Resume Course &rarr;</a>
+                          <a href="{% url 'my_courses' %}" class="btn btn-secondary btn--lg">View Enrolled Courses</a>
+                      </div>
+                  </div>
+                  {% endwith %}
+              {% else %}
+                  <div style="background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 20px; padding: 2.5rem; max-width: 600px; text-align: center;">
+                      <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">Start Your Journey</h3>
+                      <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Enroll in a course to set your first goal.</p>
+                      <a href="{% url 'course_list' %}" class="btn btn-primary btn--lg">Explore Courses</a>
+                  </div>
+              {% endif %}
+          {% endif %}
+      </div>
+  </div>
+
+  <!-- Learner Stats Scoreboard -->
+  {% include 'components/_stats_bar.html' %}
+  
+  <!-- P4.1 Analytics Tiny Cards -->
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+      <div class="card" style="padding: 1.5rem; text-align: center;">
+          <p style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">Weekly Time</p>
+          <p style="font-size: 1.75rem; font-weight: 800; color: var(--accent-primary);">{{ weekly_time_hours }}<span style="font-size: 1rem;">h</span></p>
+      </div>
+      <div class="card" style="padding: 1.5rem; text-align: center;">
+          <p style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">XP Growth</p>
+          <p style="font-size: 1.75rem; font-weight: 800; color: var(--success);">+{{ weekly_xp }}</p>
+      </div>
+      <div class="card" style="padding: 1.5rem; text-align: center;">
+          <p style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">Quiz Accuracy</p>
+          <p style="font-size: 1.75rem; font-weight: 800; color: var(--accent-primary);">{{ average_score }}<span style="font-size: 1rem;">%</span></p>
+      </div>
+      <div class="card" style="padding: 1.5rem; text-align: center;">
+          <p style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">Streak Trend</p>
+          <p style="font-size: 1.75rem; font-weight: 800; color: var(--accent-gold);">{{ request.user.profile.streak_days }} <i data-lucide="flame" class="icon-inline" style="width:20px; height:20px;"></i></p>
+      </div>
+  </div>
+
+  <!-- Two-col content -->
+  <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+
+    <!-- Learning Path Widget (P1.3) -->
+    <div class="card">
+      <h2 class="section-title" style="margin-bottom: 2rem;"><i data-lucide="map" class="icon-inline"></i> Your Learning Path</h2>
+      {% if my_courses %}
+        <div style="position: relative; padding-left: 24px; border-left: 2px solid var(--border); display: flex; flex-direction: column; gap: 2.5rem;">
+          {% for enrollment in my_courses %}
+          {% with pct=enrollment.completed_materials|default:0 total=enrollment.total_materials|default:1 %}
+          <div style="position: relative;">
+            <!-- Timeline Dot -->
+            <div style="position: absolute; left: -31px; top: 2px; width: 12px; height: 12px; border-radius: 50%; background: {% if enrollment.completed_materials == enrollment.total_materials and enrollment.total_materials > 0 %}var(--success){% else %}var(--accent-primary){% endif %}; border: 3px solid var(--surface); box-shadow: 0 0 0 2px {% if enrollment.completed_materials == enrollment.total_materials and enrollment.total_materials > 0 %}var(--success){% else %}var(--accent-primary){% endif %};"></div>
+            
+            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">{{ enrollment.course.title }}</h3>
+            
+            <div style="margin-bottom: 0.75rem;">
+              <div class="progress-container" style="height: 6px; margin-bottom: 0.5rem;">
+                <div class="progress-bar {% if enrollment.completed_materials == enrollment.total_materials and enrollment.total_materials > 0 %}success{% endif %}"
+                     style="width: {% if enrollment.total_materials > 0 %}{% widthratio enrollment.completed_materials enrollment.total_materials 100 %}%{% else %}0%{% endif %}">
+                </div>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">
+                {% if enrollment.completed_materials == enrollment.total_materials and enrollment.total_materials > 0 %}
+                ✅ Completed
+                {% else %}
+                {{ enrollment.completed_materials|default:0 }} of {{ enrollment.total_materials|default:0 }} lessons completed
+                {% endif %}
+              </p>
+            </div>
+            
+            {% if enrollment.completed_materials != enrollment.total_materials or enrollment.total_materials == 0 %}
+            <a href="{% url 'course_detail' enrollment.course.id %}" class="btn btn-secondary btn--sm" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
+              Continue
+            </a>
+            {% endif %}
+          </div>
+          {% endwith %}
+          {% endfor %}
+        </div>
+        <a href="{% url 'my_courses' %}" class="btn btn-secondary" style="margin-top: 2rem; width: 100%;">View Full Path</a>
+      {% else %}
+        <div class="empty-state">
+          <span class="empty-state__icon"><i data-lucide="map" class="icon-inline"></i></span>
+          <p class="empty-state__title">No Path Assigned</p>
+          <p class="empty-state__text">Enroll in a course to build your learning path.</p>
+          <a href="{% url 'course_list' %}" class="btn btn-primary">Explore Courses</a>
+        </div>
+      {% endif %}
+    </div>
+    
+    <!-- P4.2 Learning Insights -->
+    <div class="card" style="margin-top: 1.5rem; background: var(--surface); border: 1px solid var(--accent-primary); box-shadow: inset 0 4px 0 var(--accent-primary);">
+        <h2 class="section-title"><i data-lucide="brain-circuit" class="icon-inline" style="color: var(--accent-primary);"></i> Learning Insights</h2>
+        
+        <div style="margin-bottom: 1.5rem;">
+            <p style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">Learning Velocity</p>
+            <p style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary);">You completed <strong>{{ weekly_lessons }} lessons</strong> this week.</p>
+        </div>
+        
+        <div style="margin-bottom: 1.5rem;">
+            <p style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">Consistency Score</p>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="flex: 1; height: 8px; background: #E2E8F0; border-radius: 4px; overflow: hidden;">
+                    <div style="width: {{ consistency_score }}%; height: 100%; background: var(--accent-cyan);"></div>
+                </div>
+                <span style="font-weight: 700; color: var(--accent-cyan);">{{ consistency_score }}%</span>
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="flex: 1; background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.2); padding: 1rem; border-radius: 8px;">
+                <p style="font-size: 0.75rem; font-weight: 700; color: #059669; text-transform: uppercase; margin-bottom: 0.25rem;">Strongest Area</p>
+                <p style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary);">{{ strongest_area }}</p>
+            </div>
+            <div style="flex: 1; background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.2); padding: 1rem; border-radius: 8px;">
+                <p style="font-size: 0.75rem; font-weight: 700; color: #DC2626; text-transform: uppercase; margin-bottom: 0.25rem;">Needs Focus</p>
+                <p style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary);">{{ needs_improvement }}</p>
+            </div>
+        </div>
+        
+        {% if next_lesson %}
+        <div style="background: #F8FAFC; border: 1px solid var(--border); padding: 1.25rem; border-radius: 12px;">
+            <p style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">Recommended Next Lesson</p>
+            <h3 style="font-size: 1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">{{ next_lesson.title }}</h3>
+            <a href="{% url 'course_detail' next_lesson.course.id %}" class="btn btn-secondary btn--sm" style="width: 100%;">Study Now &rarr;</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="card">
+      <h2 class="section-title">⚡ Recent Activity</h2>
+      {% if recent_activities %}
+        {% for activity in recent_activities %}
+        <div class="activity-item">
+          <div class="activity-dot activity-dot--{% if activity.type == 'enrollment' %}enroll{% else %}complete{% endif %}" aria-hidden="true">
+            {% if activity.type == 'enrollment' %}📋{% else %}✅{% endif %}
+          </div>
+          <div class="activity-info">
+            <span class="activity-text">{{ activity.text|truncatechars:40 }}</span>
+            <span class="activity-date">{{ activity.date|timesince }} ago</span>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="no-data">No activity yet. Start a course!</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- P4.3 Recommendations Engine -->
+  {% if trending_courses or rule_recommendations %}
+  <div style="margin-bottom: 4rem;">
+      
+      {% if trending_courses %}
+      <div class="card" style="margin-bottom: 2rem;">
+        <h2 class="section-title"><i data-lucide="trending-up" class="icon-inline" style="color: var(--accent-gold);"></i> Trending This Week</h2>
+        <div class="rec-grid">
+          {% for course in trending_courses %}
+          <article class="rec-card">
+            <span class="badge badge-gold">{{ course.category.name|default:"Popular" }}</span>
+            <h3><a href="{% url 'course_detail' course.id %}">{{ course.title }}</a></h3>
+            <p>{{ course.description|truncatechars:90 }}</p>
+            <div style="display: flex; gap: 0.5rem; font-size: 0.78rem; color: var(--text-muted); flex-wrap: wrap;">
+              <span><i data-lucide="users" class="icon-inline"></i> {{ course.recent_enrolls }} Recent Enrollments</span>
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+      
+      {% if rule_recommendations %}
+      <div class="card">
+        <h2 class="section-title"><i data-lucide="lightbulb" class="icon-inline"></i> Recommended For You</h2>
+        <div class="rec-grid">
+          {% for course in rule_recommendations %}
+          <article class="rec-card">
+            <span class="badge badge-navy">{{ course.category.name|default:"General" }}</span>
+            <h3><a href="{% url 'course_detail' course.id %}">{{ course.title }}</a></h3>
+            <p>{{ course.description|truncatechars:90 }}</p>
+            <div style="display: flex; gap: 0.5rem; font-size: 0.78rem; color: var(--text-muted); flex-wrap: wrap;">
+              <span><i data-lucide="star" class="icon-inline"></i> {{ course.avg_rating|floatformat:1 }}</span>
+              <span>👥 {{ course.enrollment_count }}</span>
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+      
+  </div>
+  {% endif %}
+  
+  {% endif %}
+
+</main>
+
+{% endblock %}

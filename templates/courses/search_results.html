@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Search Courses — EduFlow LMS{% endblock %}
+{% block body_class %}page-standard{% endblock %}
+
+{% block extra_css %}
+<style>
+  .search-filter-form {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    padding: 1.5rem;
+    border-radius: 20px;
+    backdrop-filter: blur(12px);
+    margin-bottom: 2.5rem;
+  }
+  .search-filter-form input { flex-grow: 1; min-width: 200px; }
+  .search-filter-form select { min-width: 150px; }
+
+  .pagination-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    padding: 1rem 2rem;
+    border-radius: 18px;
+    backdrop-filter: blur(12px);
+    margin-top: 2rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+  .pagination-container a {
+    color: var(--text-primary);
+    text-decoration: none;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .pagination-container a:hover {
+    background: rgba(255,255,255,0.1);
+    color: var(--accent-secondary);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper" style="padding: 3rem 2rem;">
+
+    <div class="page-header">
+        <div class="page-header__left">
+            <h1 class="page-title heading-gradient">Search Courses</h1>
+            {% if query %}
+            <p class="text-muted">Results for: <strong style="color: var(--accent-secondary);">{{ query }}</strong></p>
+            {% else %}
+            <p class="text-muted">Browse all available courses</p>
+            {% endif %}
+        </div>
+        <a href="{% url 'course_list' %}" class="btn btn-secondary" id="btn-back-browse">&larr; Back to Browse</a>
+    </div>
+
+    <!-- Search / Filter Form -->
+    <form method="GET" action="{% url 'search_courses' %}" class="search-filter-form" role="search" aria-label="Search and filter courses">
+        <label for="id_q" class="sr-only">Search query</label>
+        <input type="text" id="id_q" name="q" value="{{ query }}" placeholder="Search courses..." aria-label="Search courses">
+
+        <label for="id_category" class="sr-only">Category</label>
+        <select id="id_category" name="category" aria-label="Filter by category">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if category == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="id_tag" class="sr-only">Tag</label>
+        <select id="id_tag" name="tag" aria-label="Filter by tag">
+            <option value="">All Tags</option>
+            {% for t in tags %}
+            <option value="{{ t.id }}" {% if tag == t.id|stringformat:"s" %}selected{% endif %}>{{ t.name }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="id_sort" class="sr-only">Sort by</label>
+        <select id="id_sort" name="sort" aria-label="Sort results">
+            <option value="">Newest</option>
+            <option value="rating" {% if sort == "rating" %}selected{% endif %}>Highest Rated</option>
+            <option value="reviews" {% if sort == "reviews" %}selected{% endif %}>Most Reviewed</option>
+        </select>
+
+        <button type="submit" class="btn btn-primary" id="btn-search">Search</button>
+    </form>
+
+    <!-- Results -->
+    {% if page_obj %}
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+        {% for course in page_obj %}
+        <article class="card card--hover animate-fade-in-up" style="display: flex; flex-direction: column; gap: 0.75rem;" aria-label="{{ course.title }}">
+            <div>
+                <span class="badge badge-navy" style="margin-bottom: 0.75rem;">
+                    {{ course.category.name|default:"General"|upper }}
+                </span>
+                <h2 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;">
+                    <a href="{% url 'course_detail' course.id %}" style="color: var(--text-primary); text-decoration: none; transition: color 0.2s;">
+                        {{ course.title }}
+                    </a>
+                </h2>
+                <p class="text-muted" style="font-size: 0.9rem; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;">
+                    {{ course.description }}
+                </p>
+            </div>
+            <div class="tag-chips">
+                {% for tag in course.tags.all %}
+                <span class="tag-chip">{{ tag.name }}</span>
+                {% empty %}
+                <span class="tag-chip">General</span>
+                {% endfor %}
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center; font-size: 0.85rem; color: var(--text-muted);">
+                <span style="color: #fbbf24; font-weight: 600;"><i data-lucide="star" class="icon-inline"></i> {{ course.avg_rating|default:0|floatformat:1 }}</span>
+                <span>{{ course.review_count }} Reviews</span>
+            </div>
+            <a href="{% url 'course_detail' course.id %}"
+               class="btn btn-secondary"
+               id="view-{{ course.id }}"
+               style="margin-top: auto;">
+                View Course &rarr;
+            </a>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="empty-state">
+            <span class="empty-state__icon">🔍</span>
+            <p class="empty-state__title">No matching courses found</p>
+            <p class="empty-state__text">Try different keywords or browse all available courses.</p>
+            <a href="{% url 'course_list' %}" class="btn btn-primary">Browse All Courses</a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Pagination -->
+    {% if page_obj.has_previous or page_obj.has_next or page_obj.paginator.num_pages > 1 %}
+    <nav class="pagination-container" aria-label="Page navigation">
+        {% if page_obj.has_previous %}
+        <a href="?q={{ query }}&category={{ category }}&tag={{ tag }}&sort={{ sort }}&page={{ page_obj.previous_page_number }}"
+           id="btn-prev-page" aria-label="Previous page">
+            &larr; Previous
+        </a>
+        {% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?q={{ query }}&category={{ category }}&tag={{ tag }}&sort={{ sort }}&page={{ page_obj.next_page_number }}"
+           id="btn-next-page" aria-label="Next page">
+            Next &rarr;
+        </a>
+        {% endif %}
+    </nav>
+    {% endif %}
+
+</div>
+{% endblock %}

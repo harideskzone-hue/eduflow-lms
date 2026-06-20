@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Quiz — EduFlow LMS{% endblock %}
+{% block body_class %}page-centered{% endblock %}
+
+{% block content %}
+<div class="page-wrapper--form animate-fade-in-up" style="width:100%; padding: 2rem 1rem;">
+    {% include "instructor/_nav.html" %}
+    <div class="form-card" style="margin-top: 2rem;">
+        <h1 class="form-title heading-gradient">Edit Quiz</h1>
+        <form method="POST" id="edit-quiz-form" class="form-body" novalidate>
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group {% if field.errors %}has-error{% endif %}">
+                <label class="form-label" for="{{ field.id_for_label }}">
+                    {{ field.label }}{% if field.field.required %}<span class="required" aria-hidden="true"> *</span>{% endif %}
+                </label>
+                {{ field }}
+                {% if field.errors %}
+                <div class="form-error" role="alert">{% for e in field.errors %}{{ e }}{% endfor %}</div>
+                {% endif %}
+                {% if field.help_text %}
+                <p class="form-help">{{ field.help_text }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <div class="form-actions">
+                <a href="{% url 'manage_quizzes' %}" class="btn btn-secondary" id="btn-cancel">Cancel</a>
+                <button type="submit" class="btn btn-primary" id="btn-submit">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

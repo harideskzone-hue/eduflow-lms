@@ -1,0 +1,541 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ course.title }} — EduFlow LMS{% endblock %}
+{% block meta_description %}{{ course.description|truncatechars:155 }}{% endblock %}
+
+
+{% block extra_css %}
+<style>
+  .course-detail-wrap {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 3.5rem 2rem;
+  }
+  /* Materials list */
+  .material-card {
+    display: block;
+    padding: 1.1rem 1.5rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    background: rgba(255,255,255,0.03);
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  .material-card:hover {
+    transform: translateX(8px);
+    border-color: rgba(139,92,246,0.3);
+    background: rgba(255,255,255,0.05);
+    color: inherit;
+  }
+  .material-order { color: #b56cff; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+  .material-title  { font-size: 1rem; font-weight: 500; margin-top: 0.2rem; transition: color 0.2s; }
+  .material-card:hover .material-title { color: var(--accent-secondary); }
+
+  /* Quiz card */
+  .quiz-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    padding: 1.5rem 2rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  .quiz-card:hover {
+    transform: translateX(8px);
+    border-color: rgba(139,92,246,0.3);
+  }
+
+  /* Review items */
+  .review-item {
+    padding: 1.5rem;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    background: rgba(255,255,255,0.02);
+    margin-bottom: 1rem;
+    transition: all 0.25s;
+  }
+  .review-item:hover { background: rgba(255,255,255,0.04); }
+  .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; }
+  .review-rating { color: #fbbf24; font-weight: 700; font-size: 0.95rem; }
+
+  /* Progress section */
+  .progress-section {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .progress-percent { color: var(--success); font-weight: 600; font-size: 0.875rem; text-align: right; margin-top: 0.4rem; }
+  .progress-bar { transition: width 0.8s ease; }
+  @keyframes unlockGlow {
+      0% {
+          box-shadow: 0 0 0 rgba(139,92,246,0);
+          transform: scale(1);
+      }
+      50% {
+          box-shadow: 0 0 30px rgba(139,92,246,0.6);
+          transform: scale(1.03);
+      }
+      100% {
+          box-shadow: 0 0 0 rgba(139,92,246,0);
+          transform: scale(1);
+      }
+  }
+  .quiz-unlocked-celebration {
+      animation: unlockGlow 1.5s ease-out;
+  }
+  .disabled-link {
+      pointer-events: none;
+      filter: grayscale(100%);
+      color: #94A3B8;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="course-detail-wrap">
+
+<!-- ── COURSE HERO (P1.1) ─────────────────────────────────── -->
+<div class="course-hero" style="background: var(--accent-primary); color: #FFFFFF; padding: 4rem 2rem; border-bottom: 4px solid var(--accent-gold);">
+    <div class="container" style="max-width: 1100px; margin: 0 auto; display: flex; gap: 4rem; align-items: center; flex-wrap: wrap;">
+        <!-- Left Content -->
+        <div style="flex: 1; min-width: 320px;">
+            <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; align-items: center;">
+                <span class="badge" style="background: rgba(255,255,255,0.1); color: #FFFFFF; border: 1px solid rgba(255,255,255,0.2);">
+                    {{ course.category.name|default:"Course" }}
+                </span>
+                <span class="badge" style="background: rgba(212,175,55,0.15); color: var(--accent-gold); border: 1px solid rgba(212,175,55,0.3);">
+                    <i data-lucide="award" class="icon-inline"></i> Certificate Included
+                </span>
+            </div>
+            
+            <h1 style="font-size: 3rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1.5rem;">
+                {{ course.title }}
+            </h1>
+            
+            <p style="font-size: 1.15rem; line-height: 1.6; color: #94A3B8; margin-bottom: 2rem; max-width: 600px;">
+                {{ course.description|truncatewords:30 }}
+            </p>
+            
+            <div style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; margin-bottom: 2.5rem; color: #CBD5E1; font-size: 0.95rem;">
+                <div style="display: flex; align-items: center; gap: 0.3rem;">
+                    <strong style="color: #FBBF24; font-size: 1.1rem;">
+                        <i data-lucide="star" class="icon-inline" style="fill: #FBBF24; color: #FBBF24;"></i> {{ course.average_rating|floatformat:1|default:"4.8" }}
+                    </strong>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.3rem;">
+                    <i data-lucide="users" class="icon-inline"></i> 
+                    15,230 students
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.3rem;">
+                    <i data-lucide="book-open" class="icon-inline"></i> 
+                    {{ total_lessons }} lessons
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.3rem;">
+                    <i data-lucide="clock" class="icon-inline"></i> 
+                    Updated {{ course.updated_at|date:"M Y" }}
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                {% if request.user.is_authenticated %}
+                    {% if is_enrolled %}
+                    <a href="#materials-heading" class="btn btn--lg" style="background: #FFFFFF; color: var(--accent-primary); font-weight: 700; box-shadow: var(--shadow-md);">
+                        Continue Learning &rarr;
+                    </a>
+                    {% else %}
+                    <a href="{% url 'enroll_course' course.id %}" class="btn btn-premium btn--lg" style="font-weight: 700;">
+                        Enroll Now
+                    </a>
+                    {% endif %}
+                {% else %}
+                <a href="{% url 'login' %}" class="btn btn--lg" style="background: #FFFFFF; color: var(--accent-primary); font-weight: 700; box-shadow: var(--shadow-md);">
+                    Login to Enroll
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Right Cover -->
+        <div style="width: 420px; flex-shrink: 0; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);">
+            {% if course.cover_image %}
+            <img src="{{ course.cover_image.url }}" alt="{{ course.title }}" style="width: 100%; aspect-ratio: 16/10; object-fit: cover; display: block;">
+            {% else %}
+            <div style="width: 100%; aspect-ratio: 16/10; background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%); position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                <div style="position: absolute; width: 200%; height: 200%; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.15) 0%, transparent 60%); top: -50%; left: -50%;"></div>
+                <div style="position: absolute; width: 100%; height: 100%; background-image: radial-gradient(rgba(255,255,255,0.15) 1px, transparent 1px); background-size: 20px 20px;"></div>
+                <i data-lucide="play-circle" style="width: 72px; height: 72px; color: #FFFFFF; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3)); z-index: 10; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)';" onmouseout="this.style.transform='scale(1)';"></i>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="course-detail-wrap" style="padding-top: 4rem;">
+    <!-- Description -->
+    <section style="margin-bottom: 4rem;">
+        <h2 class="section-title">About this Course</h2>
+        <p style="font-size: 1.05rem; line-height: 1.75; color: var(--text-subtle); white-space: pre-line;">
+            {{ course.description }}
+        </p>
+    </section>
+
+    <!-- Progress (enrolled only) -->
+    {% if is_enrolled %}
+    <div class="progress-section" aria-label="Your course progress">
+        <h2 class="section-title" style="font-size: 1.2rem; margin-bottom: 0.75rem;">📊 Course Progress</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.75rem;" id="course-progress-lessons-text">
+            {{ completed_lessons }} of {{ total_lessons }} lessons completed
+        </p>
+        <div class="progress-wrap progress-fill--lg" role="progressbar"
+             aria-label="Course completion"
+             aria-valuenow="{{ progress_percentage }}"
+             aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-fill progress-bar" id="course-progress-fill" style="width: {{ progress_percentage }}%;"></div>
+        </div>
+        <p class="progress-percent" id="course-progress-percent">{{ progress_percentage }}% completed</p>
+    </div>
+
+    <!-- Discussion -->
+    <div style="margin-bottom: 2.5rem;">
+        <a href="{% url 'course_discussion' course.id %}" class="btn btn-primary btn--lg" id="btn-discussion">
+            💬 Access Course Discussion Board
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Materials -->
+    <section style="margin-bottom: 3rem;" aria-labelledby="materials-heading">
+        <h2 id="materials-heading" class="section-title heading-gradient"><i data-lucide="book-open" class="icon-inline"></i> Course Materials</h2>
+        {% if materials %}
+            {% for material in materials %}
+            <div class="material-card-wrap" 
+                 id="material-card-{{ material.id }}"
+                 style="margin-bottom: 0.75rem; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; background: rgba(255,255,255,0.03); padding: 1.1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; transition: all 0.3s cubic-bezier(0.16,1,0.3,1);">
+                <div style="flex-grow: 1;">
+                    <span class="text-caption" style="color: var(--text-muted); display: block; margin-bottom: 4px;">Lesson {{ forloop.counter }}</span>
+                    <h3 class="material-title" style="font-size: 1.1rem; font-weight: 500; margin-top: 0.2rem; margin-bottom: 0;">{{ material.title }}</h3>
+                </div>
+                
+                <div style="display: flex; gap: 0.75rem; align-items: center;" id="lesson-status-{{ material.id }}">
+                    {% if is_enrolled %}
+                        {% if material.id in completed_material_ids %}
+                            <span class="badge badge-success" style="font-size: 0.85rem; padding: 0.4rem 0.8rem; background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); border-radius: 20px;">✅ Completed</span>
+                        {% else %}
+                            <a href="{% url 'material_detail' material.id %}" class="btn btn-secondary btn-sm" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" id="btn-start-{{ material.id }}">Start Lesson</a>
+                            <button class="btn btn-primary btn-sm mark-complete-btn" 
+                                    data-material-id="{{ material.id }}"
+                                    data-url="{% url 'mark_material_complete' material.id %}"
+                                    style="padding: 0.4rem 0.8rem; font-size: 0.85rem;"
+                                    id="btn-complete-{{ material.id }}">
+                                Mark Complete
+                            </button>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'material_detail' material.id %}" class="btn btn-secondary btn-sm" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" id="btn-view-{{ material.id }}">View</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <span class="empty-state__icon"><i data-lucide="file-text" class="icon-inline"></i></span>
+                <p class="empty-state__text">No materials available yet.</p>
+            </div>
+        {% endif %}
+    </section>
+
+    <!-- Quizzes -->
+    {% if quizzes %}
+    <section style="margin-bottom: 3rem;" aria-labelledby="quizzes-heading">
+        <h2 id="quizzes-heading" class="section-title heading-gradient"><i data-lucide="clipboard-list" class="icon-inline"></i> Course Quiz</h2>
+        {% for quiz in quizzes %}
+        <div class="quiz-card {% if progress_percentage < 100 %}quiz-locked-card{% endif %}" 
+             id="quiz-card-{{ quiz.id }}"
+             style="display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; padding: 1.5rem 2rem; margin-bottom: 0.75rem; border: 1px solid var(--card-border); border-radius: 20px; background: var(--card-bg); backdrop-filter: blur(12px); transition: all 0.3s cubic-bezier(0.16,1,0.3,1); {% if progress_percentage < 100 %}background: #F1F5F9; color: #94A3B8; border-color: #E2E8F0;{% endif %}">
+            <div>
+                <span class="badge badge-navy" style="margin-bottom: 0.5rem;" id="quiz-badge-{{ quiz.id }}">
+                    {% if progress_percentage < 100 %}🔒 Quiz Locked{% else %}🎉 Course Completed / 🔓 Quiz Unlocked{% endif %}
+                </span>
+                <h3 style="font-size: 1.15rem; font-weight: 600;">{{ quiz.title }}</h3>
+                <p class="text-muted" id="quiz-msg-{{ quiz.id }}" style="font-size: 0.875rem; margin-top: 0.2rem;">
+                    {% if progress_percentage < 100 %}
+                        Complete all lessons first to unlock.
+                    {% else %}
+                        Passing Score: <strong>{{ quiz.passing_score }}%</strong>
+                    {% endif %}
+                </p>
+            </div>
+            {% if is_enrolled %}
+            <a href="{% url 'quiz_detail' quiz.id %}" 
+               class="btn {% if progress_percentage < 100 %}btn-secondary disabled-link{% else %}btn-primary{% endif %}" 
+               id="quiz-btn-{{ quiz.id }}"
+               {% if progress_percentage < 100 %}style="pointer-events: none; filter: grayscale(100%); color: #94A3B8;" tabindex="-1" aria-disabled="true"{% endif %}>
+                {% if quiz.id in attempted_quiz_ids %}
+                    Attempt Again
+                {% else %}
+                    Take Quiz &rarr;
+                {% endif %}
+            </a>
+            {% else %}
+            <span class="btn btn-secondary" aria-label="Enroll to take this quiz">🔒 Enroll to Unlock</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </section>
+    {% endif %}
+
+    <!-- Reviews -->
+    <section style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 2.5rem; margin-bottom: 2.5rem;" aria-labelledby="reviews-heading">
+        <h2 id="reviews-heading" class="section-title heading-gradient"><i data-lucide="star" class="icon-inline"></i> Reviews &amp; Ratings</h2>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">
+            Average Rating: <strong style="color: #fbbf24;"><i data-lucide="star" class="icon-inline"></i> {{ course.average_rating|floatformat:1 }}</strong>
+        </p>
+
+        {% if review_form %}
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 1.75rem; margin-bottom: 2rem;">
+            <h3 style="font-size: 1.05rem; font-weight: 600; margin-bottom: 1.25rem;">Leave a Review</h3>
+            <form method="POST" action="{% url 'post_course_review' course.id %}" class="form-body" id="review-form">
+
+                {% csrf_token %}
+                {% for field in review_form %}
+                <div class="form-group {% if field.errors %}has-error{% endif %}">
+                    <label class="form-label" for="{{ field.id_for_label }}">
+                        {{ field.label }}{% if field.field.required %}<span class="required" aria-hidden="true"> *</span>{% endif %}
+                    </label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <div class="form-error" role="alert">
+                        {% for error in field.errors %}{{ error }}{% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary" id="btn-submit-review">
+                    Submit Review
+                </button>
+            </form>
+        </div>
+        {% endif %}
+
+        <div>
+            {% for review in reviews %}
+            <div class="review-item" aria-label="Review by {{ review.student.username }}">
+                <div class="review-header">
+                    <strong>{{ review.student.username }}</strong>
+                    <span class="review-rating"><i data-lucide="star" class="icon-inline"></i> {{ review.rating }}/5</span>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.925rem; line-height: 1.6;">{{ review.comment }}</p>
+            </div>
+            {% empty %}
+            <p class="text-muted">No reviews yet. Be the first to review this course!</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Actions -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.06);">
+        <a href="{% url 'course_list' %}" class="btn btn-secondary" id="btn-back-courses">
+            &larr; Back to Courses
+        </a>
+        {% if request.user.is_authenticated %}
+            {% if is_enrolled %}
+            <button class="btn btn-secondary" disabled aria-label="Already enrolled">
+                ✓ Already Enrolled
+            </button>
+            {% else %}
+            <a href="{% url 'enroll_course' course.id %}" class="btn btn-primary btn--lg" id="btn-enroll">
+                Enroll Now &rarr;
+            </a>
+            {% endif %}
+        {% else %}
+        <a href="{% url 'login' %}" class="btn btn-primary btn--lg" id="btn-login-enroll">
+            Login to Enroll &rarr;
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Hidden CSRF token holder for AJAX requests -->
+    {% if is_enrolled %}
+    <div style="display: none;" id="csrf-holder">
+        {% csrf_token %}
+    </div>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const completeBtns = document.querySelectorAll(".mark-complete-btn");
+        
+        completeBtns.forEach(btn => {
+            btn.addEventListener("click", function(e) {
+                e.preventDefault();
+                const materialId = btn.getAttribute("data-material-id");
+                const url = btn.getAttribute("data-url");
+                
+                // Get CSRF Token
+                const csrfInput = document.querySelector("#csrf-holder [name=csrfmiddlewaretoken]");
+                const csrfToken = csrfInput ? csrfInput.value : "";
+                
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfToken,
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Content-Type": "application/json"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 1. Update lesson status area
+                        const statusArea = document.getElementById(`lesson-status-${materialId}`);
+                        if (statusArea) {
+                            statusArea.innerHTML = `<span class="badge badge-success" style="font-size: 0.85rem; padding: 0.4rem 0.8rem; background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); border-radius: 20px;">✅ Completed</span>`;
+                        }
+                        
+                        // 2. Update progress bar
+                        const progressFill = document.getElementById("course-progress-fill");
+                        const progressPercent = document.getElementById("course-progress-percent");
+                        const progressLessonsText = document.getElementById("course-progress-lessons-text");
+                        
+                        if (progressFill) progressFill.style.width = `${data.percentage}%`;
+                        if (progressPercent) progressPercent.innerText = `${data.percentage}% completed`;
+                        if (progressLessonsText) progressLessonsText.innerText = `${data.completed_lessons} of ${data.total_lessons} lessons completed`;
+                        
+                        // 3. Check if quiz is unlocked
+                        if (data.quiz_unlocked) {
+                            // Find all quiz cards and unlock them
+                            const quizCards = document.querySelectorAll("[id^='quiz-card-']");
+                            quizCards.forEach(card => {
+                                card.classList.remove("quiz-locked-card");
+                                card.style.opacity = "1";
+                                card.classList.add("quiz-unlocked-celebration");
+                                
+                                // Find the badge
+                                const badge = card.querySelector("[id^='quiz-badge-']");
+                                if (badge) {
+                                    badge.innerText = "🎉 Course Completed / 🔓 Quiz Unlocked";
+                                }
+                                
+                                // Find the message
+                                const msg = card.querySelector("[id^='quiz-msg-']");
+                                if (msg) {
+                                    // Parse quiz ID from card id
+                                    const quizId = card.id.replace("quiz-card-", "");
+                                    msg.innerHTML = `Quiz is unlocked and ready to take.`;
+                                }
+                                
+                                // Enable the button
+                                const quizBtn = card.querySelector("[id^='quiz-btn-']");
+                                if (quizBtn) {
+                                    quizBtn.style.pointerEvents = "auto";
+                                    quizBtn.style.opacity = "1";
+                                    quizBtn.classList.remove("btn-secondary", "disabled-link");
+                                    quizBtn.classList.add("btn-primary");
+                                    quizBtn.removeAttribute("tabindex");
+                                    quizBtn.removeAttribute("aria-disabled");
+                                }
+                            });
+                            
+                            // Trigger confetti!
+                            triggerConfetti();
+                        }
+                    }
+                })
+                .catch(err => console.error("Error marking lesson complete:", err));
+            });
+        });
+        
+        function triggerConfetti() {
+            const canvas = document.createElement("canvas");
+            canvas.id = "confetti-canvas";
+            canvas.style.position = "fixed";
+            canvas.style.top = "0";
+            canvas.style.left = "0";
+            canvas.style.width = "100%";
+            canvas.style.height = "100%";
+            canvas.style.pointerEvents = "none";
+            canvas.style.zIndex = "9999";
+            document.body.appendChild(canvas);
+
+            const ctx = canvas.getContext("2d");
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+
+            window.addEventListener("resize", () => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            });
+
+            const colors = ["#8b5cf6", "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#ec4899"];
+            const particles = [];
+
+            for (let i = 0; i < 150; i++) {
+                particles.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height - height,
+                    r: Math.random() * 6 + 4,
+                    d: Math.random() * height,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    tilt: Math.random() * 10 - 5,
+                    tiltAngleIncremental: Math.random() * 0.07 + 0.02,
+                    tiltAngle: 0
+                });
+            }
+
+            let animationId;
+            let frames = 0;
+
+            function draw() {
+                ctx.clearRect(0, 0, width, height);
+
+                particles.forEach((p, index) => {
+                    p.tiltAngle += p.tiltAngleIncremental;
+                    p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+                    p.x += Math.sin(p.tiltAngle);
+                    p.tilt = Math.sin(p.tiltAngle - index / 3) * 15;
+
+                    ctx.beginPath();
+                    ctx.lineWidth = p.r;
+                    ctx.strokeStyle = p.color;
+                    ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+                    ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+                    ctx.stroke();
+                });
+
+                update();
+            }
+
+            function update() {
+                frames++;
+                let active = false;
+                particles.forEach((p) => {
+                    if (p.y < height) {
+                        active = true;
+                    }
+                });
+
+                if (active && frames < 250) {
+                    animationId = requestAnimationFrame(draw);
+                } else {
+                    cancelAnimationFrame(animationId);
+                    canvas.remove();
+                }
+            }
+
+            draw();
+        }
+    });
+    </script>
+    {% endif %}
+
+</div>
+{% endblock %}

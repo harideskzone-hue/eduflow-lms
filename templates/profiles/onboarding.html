@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Welcome to EduFlow{% endblock %}
+{% block body_class %}page-centered{% endblock %}
+
+{% block extra_css %}
+<style>
+  .onboarding-wrap {
+      max-width: 680px;
+      margin: 4rem auto;
+      background: var(--card-bg);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--card-border);
+      border-radius: 28px;
+      padding: 2.5rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  }
+  .onboarding-header { text-align: center; margin-bottom: 2.5rem; }
+  .step-indicator {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 2.5rem;
+  }
+  .step-dot {
+      width: 10px; height: 10px; border-radius: 5px; background: #E2E8F0; transition: all 0.3s;
+  }
+  .step-dot.active { width: 30px; background: var(--accent-primary); }
+  
+  .step-pane { display: none; animation: fadeIn 0.4s; }
+  .step-pane.active { display: block; }
+  
+  .option-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem;
+  }
+  .option-card {
+      border: 2px solid var(--border);
+      background: #F8FAFC;
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+  }
+  .option-card:hover { border-color: #2563EB; background: #FFFFFF; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37,99,235,0.1); }
+  .option-card.selected { border: 2px solid #2563EB; background: #EFF6FF; box-shadow: 0 8px 16px rgba(37,99,235,0.15); }
+  .option-card h3 { font-size: 1.1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.5rem; }
+  .option-card p { font-size: 0.85rem; color: #475569; }
+  
+  .nav-buttons { display: flex; justify-content: space-between; margin-top: 3rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="onboarding-wrap">
+    <div class="step-indicator">
+        <div class="step-dot active" id="dot1"></div>
+        <div class="step-dot" id="dot2"></div>
+        <div class="step-dot" id="dot3"></div>
+        <div class="step-dot" id="dot4"></div>
+    </div>
+    
+    <div class="onboarding-header">
+        <h1 id="stepTitle" style="font-size: 2.25rem; font-weight: 800; color: #0F172A;">What do you want to become?</h1>
+        <p class="text-muted" id="stepSub" style="font-size: 1.1rem; margin-top: 0.5rem; color: #475569;">Select your primary career destination.</p>
+    </div>
+
+    <form method="POST" id="onboardingForm">
+        {% csrf_token %}
+        <input type="hidden" name="career_goal" id="input_goal" value="">
+        <input type="hidden" name="experience_level" id="input_exp" value="">
+        <input type="hidden" name="time_commitment" id="input_time" value="">
+        <input type="hidden" name="target_deadline" id="input_deadline" value="">
+        
+        <!-- Step 1: Goal -->
+        <div class="step-pane active" id="step1">
+            <div class="option-grid">
+                {% for track in tracks %}
+                <div class="option-card selectable" data-target="input_goal" data-val="{{ track.title }}">
+                    <h3>{{ track.title }}</h3>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Step 2: Experience -->
+        <div class="step-pane" id="step2">
+            <div class="option-grid">
+                <div class="option-card selectable" data-target="input_exp" data-val="Beginner">
+                    <h3>Beginner</h3><p>Starting from scratch</p>
+                </div>
+                <div class="option-card selectable" data-target="input_exp" data-val="Intermediate">
+                    <h3>Intermediate</h3><p>Some foundational knowledge</p>
+                </div>
+                <div class="option-card selectable" data-target="input_exp" data-val="Advanced">
+                    <h3>Advanced</h3><p>Looking to master specific skills</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Time -->
+        <div class="step-pane" id="step3">
+            <div class="option-grid">
+                <div class="option-card selectable" data-target="input_time" data-val="1 Hour / Day">
+                    <h3>1 Hour / Day</h3><p>Steady and casual</p>
+                </div>
+                <div class="option-card selectable" data-target="input_time" data-val="2 Hours / Day">
+                    <h3>2 Hours / Day</h3><p>Dedicated learning</p>
+                </div>
+                <div class="option-card selectable" data-target="input_time" data-val="4 Hours / Day">
+                    <h3>4 Hours / Day</h3><p>Immersive bootcamp</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4: Deadline -->
+        <div class="step-pane" id="step4">
+            <div class="option-grid">
+                <div class="option-card selectable" data-target="input_deadline" data-val="1 Month">
+                    <h3>1 Month</h3><p>Fast track</p>
+                </div>
+                <div class="option-card selectable" data-target="input_deadline" data-val="3 Months">
+                    <h3>3 Months</h3><p>Focused goal</p>
+                </div>
+                <div class="option-card selectable" data-target="input_deadline" data-val="6 Months">
+                    <h3>6 Months</h3><p>Realistic pace</p>
+                </div>
+                <div class="option-card selectable" data-target="input_deadline" data-val="12 Months">
+                    <h3>12 Months</h3><p>Long term journey</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <button type="button" class="btn btn-secondary" id="btnBack" style="visibility: hidden;">&larr; Back</button>
+            <button type="button" class="btn btn-primary" id="btnNext" disabled>Next Step &rarr;</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    let currentStep = 1;
+    const totalSteps = 4;
+    
+    const titles = [
+        "What do you want to become?",
+        "What is your current experience level?",
+        "How much time can you commit?",
+        "When do you want to reach this goal?"
+    ];
+    const subs = [
+        "Select your primary career destination.",
+        "We'll adapt the curriculum to your starting point.",
+        "Consistency is key. Be realistic.",
+        "This helps your AI Coach keep you on track."
+    ];
+
+    document.querySelectorAll('.selectable').forEach(card => {
+        card.addEventListener('click', function() {
+            // clear peers
+            this.parentElement.querySelectorAll('.selectable').forEach(c => c.classList.remove('selected'));
+            this.classList.add('selected');
+            
+            // set value
+            const targetId = this.getAttribute('data-target');
+            document.getElementById(targetId).value = this.getAttribute('data-val');
+            
+            // enable next
+            document.getElementById('btnNext').disabled = false;
+        });
+    });
+
+    document.getElementById('btnNext').addEventListener('click', () => {
+        if (currentStep < totalSteps) {
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            document.getElementById(`dot${currentStep}`).classList.remove('active');
+            
+            currentStep++;
+            
+            document.getElementById(`step${currentStep}`).classList.add('active');
+            document.getElementById(`dot${currentStep}`).classList.add('active');
+            
+            document.getElementById('stepTitle').innerText = titles[currentStep-1];
+            document.getElementById('stepSub').innerText = subs[currentStep-1];
+            
+            document.getElementById('btnBack').style.visibility = 'visible';
+            
+            // Check if next step already has a selection
+            const targetId = document.querySelector(`#step${currentStep} .selectable`).getAttribute('data-target');
+            document.getElementById('btnNext').disabled = !document.getElementById(targetId).value;
+            
+            if (currentStep === totalSteps) {
+                document.getElementById('btnNext').innerText = "Generate My Path 🚀";
+            }
+        } else {
+            // submit
+            document.getElementById('onboardingForm').submit();
+        }
+    });
+
+    document.getElementById('btnBack').addEventListener('click', () => {
+        if (currentStep > 1) {
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            document.getElementById(`dot${currentStep}`).classList.remove('active');
+            
+            currentStep--;
+            
+            document.getElementById(`step${currentStep}`).classList.add('active');
+            document.getElementById(`dot${currentStep}`).classList.add('active');
+            
+            document.getElementById('stepTitle').innerText = titles[currentStep-1];
+            document.getElementById('stepSub').innerText = subs[currentStep-1];
+            
+            document.getElementById('btnNext').innerText = "Next Step &rarr;";
+            document.getElementById('btnNext').disabled = false; // already selected since we went back
+            
+            if (currentStep === 1) {
+                document.getElementById('btnBack').style.visibility = 'hidden';
+            }
+        }
+    });
+</script>
+{% endblock %}

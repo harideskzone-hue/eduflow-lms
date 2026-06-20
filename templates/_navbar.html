@@ -1,0 +1,59 @@
+<nav class="global-nav" aria-label="Main navigation">
+    <div class="container">
+        <div class="global-nav__left">
+            <a href="{% url 'dashboard' %}" class="global-nav__logo">EduFlow</a>
+            <div class="global-nav__links">
+                {% if request.user.is_authenticated %}
+                    {% if is_admin %}
+                    <a href="{% url 'instructor_dashboard' %}">Instructor Portal</a>
+                    <a href="{% url 'monitoring_dashboard' %}">Monitoring</a>
+                    <a href="{% url 'reports_dashboard' %}">Reports</a>
+                    {% else %}
+                    <a href="{% url 'dashboard' %}">Dashboard</a>
+                    <a href="{% url 'my_courses' %}">My Learning</a>
+                    <a href="{% url 'course_list' %}">Explore</a>
+                    <a href="{% url 'certificate_list' %}">Certificates</a>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'course_list' %}">Explore</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="global-nav__right">
+            {% if request.user.is_authenticated %}
+                <div class="global-nav__links" style="gap: 24px;">
+                    <form action="{% url 'search_courses' %}" method="get" style="position: relative; flex: 0 0 240px; max-width: 240px;">
+                        <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-muted);"></i>
+                        <input type="text" name="q" placeholder="Search Courses..." class="input" style="padding-left: 36px; padding-top: 0.5rem; padding-bottom: 0.5rem; border-radius: var(--radius-full); width: 100%; background: #F8FAFC;">
+                    </form>
+                    <div class="nav-notifications" style="position: relative; display: flex; align-items: center;">
+                        <button id="notificationBell" style="background: none; border: none; cursor: pointer; position: relative; padding: 0;">
+                            <i data-lucide="bell" style="width: 20px; color: var(--text-muted);"></i>
+                            <span id="unreadCount" style="display: none; position: absolute; top: -5px; right: -5px; background: var(--accent-red, #EF4444); color: white; border-radius: 50%; padding: 2px 5px; font-size: 10px; font-weight: bold;">0</span>
+                        </button>
+                        <div id="notificationDropdown" style="display: none; position: absolute; right: 0; top: calc(100% + 10px); width: 320px; background: var(--card-bg, white); border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-radius: 12px; z-index: 100; padding: 1rem; flex-direction: column;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
+                                <strong style="color: var(--text-primary);">Notifications</strong>
+                                <button id="markAllReadBtn" style="font-size: 0.8rem; border: none; background: none; color: var(--accent-primary); cursor: pointer; font-weight: 600;">Mark all read</button>
+                            </div>
+                            <div id="notificationList" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
+                                <!-- Content will be injected here -->
+                            </div>
+                            <div style="text-align: center; margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 0.5rem;">
+                                <a href="{% url 'notification_list' %}" style="font-size: 0.85rem; color: var(--accent-primary); text-decoration: none; font-weight: 600;">View All Activity</a>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="{% url 'profile' %}" aria-label="Profile" style="display: flex; align-items: center;">
+                        <div class="avatar avatar-sm" aria-hidden="true">{{ request.user.username|make_list|first|upper }}</div>
+                    </a>
+                </div>
+            {% else %}
+                <div class="global-nav__links">
+                    <a href="{% url 'login' %}" class="btn btn-secondary btn--sm">Log In</a>
+                    <a href="{% url 'register' %}" class="btn btn-primary btn--sm">Sign Up</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</nav>

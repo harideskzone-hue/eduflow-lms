@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Certificate of Completion — {{ certificate.course.title }} — EduFlow LMS{% endblock %}
+{% block body_class %}page-centered{% endblock %}
+
+{% block extra_css %}
+<style>
+  .cert-wrap {
+    position: relative; z-index: 2;
+    width: 100%; max-width: 800px;
+    padding: 3rem 1rem;
+    margin: 0 auto;
+  }
+  .cert-card {
+    background: #FFFFFF;
+    border: 12px solid var(--accent-primary);
+    padding: 5rem 4rem;
+    text-align: center;
+    box-shadow: 0 24px 64px rgba(15,23,42,.16);
+    animation: fadeInUp 0.6s cubic-bezier(0.16,1,0.3,1);
+    position: relative;
+  }
+  .cert-seal-wrap {
+    position: absolute;
+    top: -40px; left: 50%;
+    transform: translateX(-50%);
+    width: 80px; height: 80px;
+    background: var(--accent-primary);
+    border: 4px solid var(--accent-gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 24px rgba(212,175,55,0.3);
+  }
+  .cert-title { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em; margin-top: 1rem; margin-bottom: 0.5rem; color: var(--accent-primary); }
+  .cert-divider {
+    width: 100px; height: 2px;
+    background: var(--accent-gold);
+    margin: 2rem auto;
+  }
+  .cert-subtitle { font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 1rem; }
+  .cert-name { font-size: 3rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 2rem; color: var(--accent-primary); font-family: 'Times New Roman', Times, serif; font-style: italic; }
+  .cert-course { font-size: 1.5rem; font-weight: 700; margin-bottom: 3rem; color: var(--accent-primary); }
+  
+  .skills-box {
+    margin: 0 auto 3rem;
+    padding: 1.5rem; border: 1px solid rgba(212,175,55,0.3);
+    background: rgba(212,175,55,0.02);
+    border-radius: 8px; max-width: 500px;
+  }
+  .skills-title { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-gold); margin-bottom: 1rem; }
+  .skills-grid {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem;
+  }
+  .skill-badge {
+    background: #FFFFFF; border: 1px solid var(--border);
+    padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; color: var(--accent-primary);
+  }
+  
+  .cert-meta { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem; border-top: 1px solid var(--border); padding-top: 2rem; text-align: left; }
+  .cert-meta-item { display: flex; flex-direction: column; gap: 0.25rem; }
+  .cert-meta-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+  .cert-meta-val { font-size: 0.9rem; font-weight: 600; color: var(--accent-primary); }
+  .cert-meta-item:nth-child(2) { text-align: center; }
+  .cert-meta-item:nth-child(3) { text-align: right; }
+  
+  .actions {
+    display: flex; justify-content: center; gap: 1rem; margin-top: 2.5rem;
+  }
+  
+  @media (max-width: 768px) {
+    .cert-meta { grid-template-columns: 1fr; text-align: center !important; gap: 1rem; }
+    .cert-meta-item { text-align: center !important; }
+    .actions { flex-direction: column; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cert-wrap">
+    <div class="cert-card" role="main" aria-label="Certificate of Completion">
+        <div class="cert-seal-wrap">
+            <i data-lucide="award" style="color: var(--accent-gold); width: 36px; height: 36px;"></i>
+        </div>
+        
+        <h1 class="cert-title">Certificate of Completion</h1>
+        <div class="cert-divider"></div>
+
+        <p class="cert-subtitle">THIS IS PROUDLY PRESENTED TO</p>
+        <p class="cert-name">{{ certificate.student.get_full_name|default:certificate.student.username }}</p>
+
+        <p class="cert-subtitle">Awarded for successful completion of</p>
+        <p class="cert-course">{{ certificate.course.title }}</p>
+
+        <!-- Skills Earned -->
+        <div class="skills-box">
+            <div class="skills-title">Skills Demonstrated</div>
+            <div class="skills-grid">
+                <span class="skill-badge"><i data-lucide="check" style="width:14px;height:14px;color:var(--accent-gold);margin-right:4px;"></i> Python</span>
+                <span class="skill-badge"><i data-lucide="check" style="width:14px;height:14px;color:var(--accent-gold);margin-right:4px;"></i> Django</span>
+                <span class="skill-badge"><i data-lucide="check" style="width:14px;height:14px;color:var(--accent-gold);margin-right:4px;"></i> REST APIs</span>
+            </div>
+        </div>
+
+        <div class="cert-meta">
+            <div class="cert-meta-item">
+                <span class="cert-meta-label">Issued On</span>
+                <span class="cert-meta-val">{{ certificate.issued_at|date:"F d, Y" }}</span>
+            </div>
+            <div class="cert-meta-item">
+                <span class="cert-meta-label">Certificate ID</span>
+                <span class="cert-meta-val" style="font-family: monospace;">{{ certificate.certificate_id }}</span>
+            </div>
+            <div class="cert-meta-item">
+                <span class="cert-meta-label">Issued By</span>
+                <span class="cert-meta-val" style="font-family: 'Times New Roman', Times, serif; font-style: italic;">EduFlow LMS</span>
+            </div>
+        </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-top: 2.5rem;">
+        <a href="{% url 'download_certificate' certificate.certificate_id %}" style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 1.5rem 1rem; text-align: center; color: #0F172A; text-decoration: none; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 0.75rem; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 16px rgba(15,23,42,0.06)';" onmouseout="this.style.transform='none'; this.style.boxShadow='none';">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: #EFF6FF; display: flex; align-items: center; justify-content: center; color: #2563EB;">
+                <i data-lucide="download"></i>
+            </div>
+            Download PDF
+        </a>
+        <a href="{% url 'verify_certificate' certificate.certificate_id %}" style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 1.5rem 1rem; text-align: center; color: #0F172A; text-decoration: none; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 0.75rem; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 16px rgba(15,23,42,0.06)';" onmouseout="this.style.transform='none'; this.style.boxShadow='none';">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: #ECFDF5; display: flex; align-items: center; justify-content: center; color: #10B981;">
+                <i data-lucide="check-circle"></i>
+            </div>
+            Verify Credential
+        </a>
+        <a href="#" style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 1.5rem 1rem; text-align: center; color: #0F172A; text-decoration: none; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 0.75rem; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 16px rgba(15,23,42,0.06)';" onmouseout="this.style.transform='none'; this.style.boxShadow='none';">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: #FFFBEB; display: flex; align-items: center; justify-content: center; color: #F59E0B;">
+                <i data-lucide="share-2"></i>
+            </div>
+            Share Certificate
+        </a>
+        <a href="{% url 'public_portfolio' certificate.student.username %}" style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 1.5rem 1rem; text-align: center; color: #0F172A; text-decoration: none; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 0.75rem; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 16px rgba(15,23,42,0.06)';" onmouseout="this.style.transform='none'; this.style.boxShadow='none';">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: #F5F3FF; display: flex; align-items: center; justify-content: center; color: #8B5CF6;">
+                <i data-lucide="briefcase"></i>
+            </div>
+            Add To Portfolio
+        </a>
+    </div>
+
+    <div style="margin-top: 4rem; text-align: center;">
+        <a href="{% url 'dashboard' %}" class="btn btn-primary btn--lg" style="font-size: 1.1rem; font-weight: 800; padding: 1.25rem 3rem; border-radius: 9999px; box-shadow: 0 10px 25px rgba(37,99,235,0.3); transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 15px 35px rgba(37,99,235,0.4)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 10px 25px rgba(37,99,235,0.3)';">
+            ← Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

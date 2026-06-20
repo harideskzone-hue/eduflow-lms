@@ -45,7 +45,22 @@ INSTALLED_APPS = [
     'materials',
     'quizzes',
     'dashboard',
+    'progress',
+    'certificates',
+    'profiles',
+    'instructor',
+    'discussions',
+    'notifications',
+    'announcements',
+    'monitoring',
+    'reports',
+    'ai',
+    'paths',
+    'projects',
 ]
+
+# Custom User Model
+AUTH_USER_MODEL = 'accounts.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -130,6 +145,10 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -138,3 +157,27 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+import os
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
+SENTRY_DSN = os.environ.get('SENTRY_DSN')
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=1.0,
+        send_default_pii=True
+    )
+
+SHOW_DEBUG_TOOLBAR = os.environ.get("SHOW_DEBUG_TOOLBAR", "False") == "True"
+if DEBUG and SHOW_DEBUG_TOOLBAR:
+    INSTALLED_APPS += ["debug_toolbar"]
+    MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
+
+LOGIN_REDIRECT_URL = "dashboard"
+LOGOUT_REDIRECT_URL = "dashboard"
+LOGIN_URL = "login"
+
+LOG_DIR = BASE_DIR / "logs"

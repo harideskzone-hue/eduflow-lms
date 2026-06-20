@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Create Question — EduFlow LMS{% endblock %}
+{% block body_class %}page-centered{% endblock %}
+
+{% block content %}
+<div class="page-wrapper--form animate-fade-in-up" style="width:100%; padding: 2rem 1rem;">
+    {% include "instructor/_nav.html" %}
+    <div class="form-card" style="margin-top: 2rem;">
+        <h1 class="form-title heading-gradient">Add Question</h1>
+        {% if quiz %}
+        <p class="text-muted" style="text-align:center; margin-top:-1.25rem; margin-bottom:2rem;">
+            Quiz: <strong>{{ quiz.title }}</strong>
+        </p>
+        {% endif %}
+        <form method="POST" id="create-question-form" class="form-body" novalidate>
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group {% if field.errors %}has-error{% endif %}">
+                <label class="form-label" for="{{ field.id_for_label }}">
+                    {{ field.label }}{% if field.field.required %}<span class="required" aria-hidden="true"> *</span>{% endif %}
+                </label>
+                {{ field }}
+                {% if field.errors %}
+                <div class="form-error" role="alert">{% for e in field.errors %}{{ e }}{% endfor %}</div>
+                {% endif %}
+                {% if field.help_text %}
+                <p class="form-help">{{ field.help_text }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <div class="form-actions">
+                {% if quiz %}
+                <a href="{% url 'manage_questions' quiz.pk %}" class="btn btn-secondary" id="btn-cancel">Cancel</a>
+                {% else %}
+                <a href="{% url 'manage_quizzes' %}" class="btn btn-secondary" id="btn-cancel">Cancel</a>
+                {% endif %}
+                <button type="submit" class="btn btn-primary" id="btn-submit">Add Question</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

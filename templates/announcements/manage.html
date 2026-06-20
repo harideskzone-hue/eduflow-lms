@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Manage Announcements — EduFlow LMS{% endblock %}
+{% block body_class %}page-standard{% endblock %}
+
+{% block content %}
+{% include "instructor/_nav.html" %}
+
+<div class="page-wrapper" style="padding: 3rem 2rem;">
+
+    <div class="page-header">
+        <div class="page-header__left">
+            <h1 class="page-title heading-gradient">📣 Announcements</h1>
+            <p class="text-muted">Manage course and global announcements</p>
+        </div>
+        <div class="page-header__right">
+            <a href="{% url 'create_announcement' %}" class="btn btn-primary" id="btn-create">+ Create Announcement</a>
+            <a href="{% url 'instructor_dashboard' %}" class="btn btn-secondary" id="btn-dash">&larr; Dashboard</a>
+        </div>
+    </div>
+
+    <div class="card" style="padding: 0; overflow: hidden;">
+        {% for announcement in announcements %}
+        <div class="data-row" style="padding: 1.5rem 1.75rem; flex-wrap: wrap; gap: 1rem;" aria-label="{{ announcement.title }}">
+            <div class="data-row__info" style="flex: 1;">
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.4rem; flex-wrap: wrap;">
+                    <span class="data-row__title">{{ announcement.title }}</span>
+                    {% if announcement.course %}
+                    <span class="badge badge-navy" style="font-size: 0.7rem;">{{ announcement.course.title|truncatechars:25 }}</span>
+                    {% else %}
+                    <span class="badge badge-green" style="font-size: 0.7rem;">Global</span>
+                    {% endif %}
+                    {% if announcement.is_published %}
+                    <span class="badge badge-blue" style="font-size: 0.7rem;">✓ Published</span>
+                    {% endif %}
+                </div>
+                <p class="data-row__sub" style="line-height: 1.55; max-width: 600px;">{{ announcement.message|truncatechars:120 }}</p>
+            </div>
+            <div class="data-row__actions">
+                {% if not announcement.is_published %}
+                <form method="POST" action="{% url 'publish_announcement' announcement.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn--sm btn-primary" id="publish-{{ announcement.id }}">
+                        Publish
+                    </button>
+                </form>
+                {% else %}
+                <span class="badge badge-blue">Published</span>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state" style="padding: 4rem 2rem;">
+            <span class="empty-state__icon">📣</span>
+            <p class="empty-state__title">No announcements yet</p>
+            <p class="empty-state__text">Create your first course or global announcement.</p>
+            <a href="{% url 'create_announcement' %}" class="btn btn-primary" id="btn-first">+ Create Announcement</a>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

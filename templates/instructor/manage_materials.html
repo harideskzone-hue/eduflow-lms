@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Manage Materials — EduFlow LMS{% endblock %}
+{% block body_class %}page-standard{% endblock %}
+
+{% block content %}
+{% include "instructor/_nav.html" %}
+
+<div class="page-wrapper" style="padding: 3rem 2rem;">
+
+    <div class="page-header">
+        <div class="page-header__left">
+            <h1 class="page-title heading-gradient">Manage Materials</h1>
+            <p class="text-muted">{{ materials|length }} lesson{{ materials|length|pluralize }}</p>
+        </div>
+        <div class="page-header__right">
+            <a href="{% url 'create_material' %}" class="btn btn-primary" id="btn-create">+ Create Material</a>
+            <a href="{% url 'instructor_dashboard' %}" class="btn btn-secondary" id="btn-dash">&larr; Dashboard</a>
+        </div>
+    </div>
+
+    <div class="card">
+        {% if materials %}
+        <div class="data-list">
+            {% for material in materials %}
+            <div class="data-row" aria-label="Material: {{ material.title }}">
+                <div class="data-row__info">
+                    <span class="data-row__title">{{ material.title }}</span>
+                    <span class="data-row__sub">
+                        <span class="badge badge-navy" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">{{ material.course.title|truncatechars:30 }}</span>
+                        &nbsp;Lesson {{ material.order }}
+                    </span>
+                </div>
+                <div class="data-row__actions">
+                    <a href="{% url 'edit_material' material.pk %}" class="btn btn--sm btn-secondary" id="edit-{{ material.pk }}">Edit</a>
+                    <a href="{% url 'delete_material' material.pk %}" class="btn btn--sm btn-danger" id="delete-{{ material.pk }}" aria-label="Delete {{ material.title }}">Delete</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <span class="empty-state__icon"><i data-lucide="file-text" class="icon-inline"></i></span>
+            <p class="empty-state__title">No materials yet</p>
+            <p class="empty-state__text">Add your first lesson material to a course.</p>
+            <a href="{% url 'create_material' %}" class="btn btn-primary" id="btn-first">+ Create Material</a>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

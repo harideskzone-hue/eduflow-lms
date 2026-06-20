@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}System Monitoring Dashboard — EduFlow LMS{% endblock %}
+{% block body_class %}page-standard{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Log items */
+  .log-list { display: flex; flex-direction: column; gap: 0.6rem; }
+  .log-item {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 12px; padding: 1rem 1.25rem;
+    transition: border-color 0.2s;
+  }
+  .log-item:hover { border-color: rgba(255,255,255,0.1); }
+  .log-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem; }
+  .log-time { color:var(--text-muted); font-size:0.775rem; font-family:monospace; }
+  .log-tag {
+    font-weight:700; text-transform:uppercase; letter-spacing:0.05em;
+    padding:0.2rem 0.5rem; border-radius:5px; font-size:0.7rem;
+  }
+  .log-msg { font-size:0.875rem; color:var(--text-subtle); line-height:1.5; word-break:break-word; }
+  .tag-enrollment   { background:rgba(34,197,94,0.1); color:#4ade80; border:1px solid rgba(34,197,94,0.2); }
+  .tag-quiz         { background:rgba(6,182,212,0.1); color:#22d3ee; border:1px solid rgba(6,182,212,0.2); }
+  .tag-certificate  { background:rgba(217,70,239,0.1); color:#f472b6; border:1px solid rgba(217,70,239,0.2); }
+  .tag-announcement { background:rgba(245,158,11,0.1); color:#fbbf24; border:1px solid rgba(245,158,11,0.2); }
+  .tag-discussion   { background:rgba(139,92,246,0.1); color:#a78bfa; border:1px solid rgba(139,92,246,0.2); }
+  .tag-error        { background:rgba(239,68,68,0.1); color:#f87171; border:1px solid rgba(239,68,68,0.2); }
+  .tag-system       { background:rgba(255,255,255,0.05); color:var(--text-muted); border:1px solid rgba(255,255,255,0.05); }
+  /* Health dot */
+  .health-dot { width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:0.4rem; }
+  .health-dot.healthy { background:#4ade80; box-shadow:0 0 8px rgba(74,222,128,0.5); }
+  .health-dot.warning { background:#fbbf24; }
+  .health-dot.critical{ background:#f87171; }
+  /* Traceback */
+  .traceback-trigger {
+    background:none; border:none; color:var(--accent-secondary);
+    font-size:0.8rem; font-weight:500; cursor:pointer;
+    padding:0; margin-top:0.3rem; text-align:left;
+  }
+  .traceback-trigger:hover { text-decoration:underline; }
+  .traceback-content { display:none; margin-top:0.5rem; }
+  .traceback-content pre {
+    background:#0f172a; color:#f87171;
+    padding:1rem; border-radius:8px;
+    font-family:monospace; font-size:0.75rem;
+    overflow-x:auto; max-height:250px; overflow-y:auto;
+    border:1px solid rgba(239,68,68,0.15);
+  }
+  .error-log-item { border-color:rgba(239,68,68,0.15) !important; }
+  .top-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; margin-bottom:2rem; }
+  .metric-card {
+    background:var(--card-bg); border:1px solid var(--card-border); border-radius:20px;
+    padding:1.75rem; backdrop-filter:blur(12px);
+    display:flex; flex-direction:column; gap:0.75rem;
+  }
+  .metric-label { font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:var(--text-muted); }
+  .metric-value { font-size:2.5rem; font-weight:800; letter-spacing:-0.03em; color: #0F172A; }
+  .metric-value--red { color: #EF4444 !important; }
+  .health-badge { display:inline-flex; align-items:center; font-size:1rem; font-weight:600; }
+  @media (max-width:900px) { .top-grid { grid-template-columns:1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "instructor/_nav.html" %}
+<div class="page-wrapper" style="padding:2.5rem 2rem;">
+
+    <div class="page-header">
+        <div class="page-header__left">
+            <h1 class="page-title heading-gradient">⚡ System Monitoring</h1>
+            <p class="text-muted">EduFlow real-time diagnostic dashboard</p>
+        </div>
+        <div class="page-header__right">
+            <a href="{% url 'reports_dashboard' %}" class="btn btn--sm btn-green" id="btn-reports">Reports</a>
+            <a href="{% url 'audit_dashboard' %}" class="btn btn--sm btn-secondary" id="btn-audit">Audit Trail</a>
+            <a href="{% url 'instructor_dashboard' %}" class="btn btn--sm btn-secondary" id="btn-instructor">Instructor</a>
+        </div>
+    </div>
+
+    <!-- Top metrics -->
+    <div class="top-grid" role="region" aria-label="System health overview">
+        <div class="metric-card">
+            <span class="metric-label">System Health</span>
+            <span class="health-badge">
+                <span class="health-dot {{ health_color }}" aria-hidden="true"></span>
+                {{ health_status }}
+            </span>
+        </div>
+        <div class="metric-card">
+            <span class="metric-label">Total Events</span>
+            <span class="metric-value">{{ total_events }}</span>
+        </div>
+        <div class="metric-card">
+            <span class="metric-label">Total Errors</span>
+            <span class="metric-value metric-value--red">{{ total_errors }}</span>
+        </div>
+    </div>
+
+    <!-- Event breakdown -->
+    <div class="stats-grid" style="margin-bottom:2rem;" role="region" aria-label="Event breakdown">
+        <div class="stat-card"><p class="stat-label">Enrollments</p><p class="stat-value" style="font-size:1.75rem;">{{ event_counts.ENROLLMENT|default:0 }}</p></div>
+        <div class="stat-card"><p class="stat-label">Quiz Attempts</p><p class="stat-value" style="font-size:1.75rem;">{{ event_counts.QUIZ_ATTEMPT|default:0 }}</p></div>
+        <div class="stat-card"><p class="stat-label">Certificates</p><p class="stat-value" style="font-size:1.75rem;">{{ event_counts.CERTIFICATE_ISSUED|default:0 }}</p></div>
+        <div class="stat-card"><p class="stat-label">Replies</p><p class="stat-value" style="font-size:1.75rem;">{{ event_counts.DISCUSSION_REPLY|default:0 }}</p></div>
+        <div class="stat-card"><p class="stat-label">Announcements</p><p class="stat-value" style="font-size:1.75rem;">{{ event_counts.ANNOUNCEMENT_PUBLISHED|default:0 }}</p></div>
+        <div class="stat-card" style="border-color:rgba(239,68,68,0.15); background:rgba(239,68,68,0.02);">
+            <p class="stat-label" style="color:#f87171;">Failed Emails</p>
+            <p class="stat-value" style="font-size:1.75rem; color:#f87171;">{{ error_counts.EMAIL_DELIVERY_FAILED|default:0 }}</p>
+        </div>
+    </div>
+
+    <!-- Guided Learning Flow Metrics -->
+    <div style="margin-bottom: 2.5rem;">
+        <h2 class="section-title" style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-subtle);">📈 Guided Learning Flow (DB-Backed Real-Time)</h2>
+        <div class="stats-grid" style="margin-bottom: 2rem;" role="region" aria-label="Guided learning flow metrics">
+            <div class="stat-card">
+                <p class="stat-label">Lessons Completed (Today)</p>
+                <p class="stat-value" style="font-size:1.75rem; color: #a78bfa;">{{ db_stats.lessons_completed_today|default:0 }}</p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-label">Quiz Unlocks</p>
+                <p class="stat-value" style="font-size:1.75rem; color: #22d3ee;">{{ db_stats.quiz_unlocks|default:0 }}</p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-label">Quiz Passes</p>
+                <p class="stat-value" style="font-size:1.75rem; color: #34d399;">{{ db_stats.quiz_passes|default:0 }}</p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-label">Certificates Earned</p>
+                <p class="stat-value" style="font-size:1.75rem; color: #fbbf24;">{{ db_stats.certificates_issued|default:0 }}</p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-label">Reports Viewed</p>
+                <p class="stat-value" style="font-size:1.75rem; color: #f472b6;">{{ db_stats.reports_generated|default:0 }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logs grid -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+
+        <!-- Recent events -->
+        <div class="card">
+            <h2 class="section-title" style="font-size:1rem; margin-bottom:1rem;">📋 Recent Business Events</h2>
+            {% if recent_events %}
+            <div class="log-list">
+                {% for event in recent_events %}
+                <div class="log-item">
+                    <div class="log-header">
+                        <span class="log-time">{{ event.timestamp }}</span>
+                        {% if event.event_type == 'ENROLLMENT' %}<span class="log-tag tag-enrollment">Enrollment</span>
+                        {% elif event.event_type == 'QUIZ_ATTEMPT' %}<span class="log-tag tag-quiz">Quiz</span>
+                        {% elif event.event_type == 'CERTIFICATE_ISSUED' %}<span class="log-tag tag-certificate">Certificate</span>
+                        {% elif event.event_type == 'ANNOUNCEMENT_PUBLISHED' %}<span class="log-tag tag-announcement">Announcement</span>
+                        {% elif event.event_type == 'DISCUSSION_REPLY' %}<span class="log-tag tag-discussion">Reply</span>
+                        {% else %}<span class="log-tag tag-system">{{ event.event_type }}</span>
+                        {% endif %}
+                    </div>
+                    <p class="log-msg">{{ event.message }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted text-center" style="padding:2rem 0;">No operational events in logs.</p>
+            {% endif %}
+        </div>
+
+        <!-- Recent errors -->
+        <div class="card">
+            <h2 class="section-title" style="font-size:1rem; margin-bottom:1rem;">🔴 Recent Application Errors</h2>
+            {% if recent_errors %}
+            <div class="log-list">
+                {% for err in recent_errors %}
+                <div class="log-item error-log-item">
+                    <div class="log-header">
+                        <span class="log-time">{{ err.timestamp }}</span>
+                        <span class="log-tag tag-error">{{ err.event_type }}</span>
+                    </div>
+                    <p class="log-msg" style="color:#f87171; font-weight:500;">{{ err.message }}</p>
+                    {% if err.traceback_str %}
+                    <button class="traceback-trigger" onclick="toggleTraceback(this)" aria-expanded="false">
+                        Show Traceback &darr;
+                    </button>
+                    <div class="traceback-content" role="region" aria-label="Error traceback">
+                        <pre><code>{{ err.traceback_str }}</code></pre>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted text-center" style="padding:2rem 0;">✅ No errors found. System is running cleanly!</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleTraceback(btn) {
+    const content = btn.nextElementSibling;
+    const isOpen = content.style.display === 'block';
+    content.style.display = isOpen ? 'none' : 'block';
+    btn.innerHTML = isOpen ? 'Show Traceback &darr;' : 'Hide Traceback &uarr;';
+    btn.setAttribute('aria-expanded', String(!isOpen));
+}
+</script>
+{% endblock %}

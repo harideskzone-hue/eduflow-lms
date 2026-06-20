@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ quiz.title }} — EduFlow LMS{% endblock %}
+{% block body_class %}page-centered{% endblock %}
+
+{% block extra_css %}
+<style>
+  .quiz-wrap {
+    position: relative; z-index: 2;
+    width: 100%; max-width: 740px;
+    padding: 2rem 1rem;
+  }
+  .quiz-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    border-radius: 28px;
+    padding: 3.5rem;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    animation: fadeInUp 0.5s cubic-bezier(0.16,1,0.3,1);
+  }
+  .question-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    text-align: left;
+  }
+  .question-card h3 {
+    font-size: 1.1rem; font-weight: 600;
+    line-height: 1.5; margin-bottom: 1.25rem;
+    display: flex; gap: 0.5rem;
+  }
+  .q-number { color: #2563EB; }
+  .options-list { display: flex; flex-direction: column; gap: 0.75rem; }
+  .option-label {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 1.25rem;
+    background: #F8FAFC;
+    border: 2px solid #E5E7EB;
+    color: #111827;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .option-label:hover {
+    background: #EFF6FF;
+    border-color: #2563EB;
+  }
+  /* Custom radio */
+  .option-label input[type="radio"] {
+    appearance: none; -webkit-appearance: none;
+    width: 1.25rem; height: 1.25rem;
+    border: 2px solid #D1D5DB;
+    border-radius: 50%;
+    background: #FFFFFF;
+    cursor: pointer;
+    display: inline-grid;
+    place-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .option-label input[type="radio"]::before {
+    content: "";
+    width: 0.6rem; height: 0.6rem;
+    border-radius: 50%;
+    transform: scale(0);
+    transition: 120ms transform ease-in-out;
+    background: #FFFFFF;
+  }
+  .option-label input[type="radio"]:checked {
+    background: #2563EB;
+    border-color: #2563EB;
+  }
+  .option-label input[type="radio"]:checked::before { transform: scale(1); }
+  .option-label:has(input[type="radio"]:checked) {
+    background: #DBEAFE;
+    border-color: #2563EB;
+  }
+  .option-label.correct {
+    background: #DCFCE7;
+    border-color: #10B981;
+  }
+  .option-label.wrong {
+    background: #FEE2E2;
+    border-color: #EF4444;
+  }
+  .opt-letter {
+    font-size: 0.85rem; font-weight: 700;
+    color: #64748B;
+    background: #E2E8F0;
+    width: 1.75rem; height: 1.75rem;
+    border-radius: 6px;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .option-label:has(input[type="radio"]:checked) .opt-letter {
+    background: #2563EB;
+    color: #FFFFFF;
+  }
+  .opt-text { font-size: 0.95rem; color: #111827; }
+
+  /* Progress bar for quiz */
+  .quiz-progress { margin-bottom: 2.5rem; }
+  .quiz-progress-label {
+    display: flex; justify-content: space-between;
+    font-size: 0.8rem; color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  @media (max-width: 480px) {
+    .quiz-card { padding: 2rem 1.5rem; border-radius: 20px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="quiz-wrap">
+    <div class="quiz-card">
+        <span class="badge badge-navy" style="margin-bottom: 1.5rem;">Evaluation</span>
+        <h1 style="font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 0.5rem;" class="heading-gradient">
+            {{ quiz.title }}
+        </h1>
+        <p class="text-muted" style="margin-bottom: 1.5rem;">Course: <strong>{{ quiz.course.title }}</strong></p>
+
+        {% if quiz.description %}
+        <p style="color: var(--text-subtle); line-height: 1.7; margin-bottom: 2rem;">{{ quiz.description }}</p>
+        {% endif %}
+
+        <!-- Quiz meta stats -->
+        <div class="stats-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 2.5rem;"
+             role="region" aria-label="Quiz information">
+            <div class="stat-card">
+                <p class="stat-label">Passing Score</p>
+                <p class="stat-value" style="font-size: 1.75rem;">{{ quiz.passing_score }}%</p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-label">Questions</p>
+                <p class="stat-value" style="font-size: 1.75rem;">{{ quiz.questions.count }}</p>
+            </div>
+        </div>
+
+        <!-- Quiz form -->
+        <form method="POST" id="quiz-form" novalidate>
+            {% csrf_token %}
+
+            {% for question in questions %}
+            <div class="question-card" id="q-{{ question.id }}" role="group" aria-labelledby="q-text-{{ question.id }}">
+                <h3>
+                    <span class="q-number" aria-hidden="true">{{ forloop.counter }}.</span>
+                    <span id="q-text-{{ question.id }}">{{ question.text }}</span>
+                </h3>
+
+                <div class="options-list" role="radiogroup" aria-label="Options for question {{ forloop.counter }}">
+                    <label class="option-label">
+                        <input type="radio" name="question_{{ question.id }}" value="A" required
+                               aria-label="Option A: {{ question.option_a }}">
+                        <span class="opt-letter" aria-hidden="true">A</span>
+                        <span class="opt-text">{{ question.option_a }}</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="question_{{ question.id }}" value="B"
+                               aria-label="Option B: {{ question.option_b }}">
+                        <span class="opt-letter" aria-hidden="true">B</span>
+                        <span class="opt-text">{{ question.option_b }}</span>
+                    </label>
+                    {% if question.option_c %}
+                    <label class="option-label">
+                        <input type="radio" name="question_{{ question.id }}" value="C"
+                               aria-label="Option C: {{ question.option_c }}">
+                        <span class="opt-letter" aria-hidden="true">C</span>
+                        <span class="opt-text">{{ question.option_c }}</span>
+                    </label>
+                    {% endif %}
+                    {% if question.option_d %}
+                    <label class="option-label">
+                        <input type="radio" name="question_{{ question.id }}" value="D"
+                               aria-label="Option D: {{ question.option_d }}">
+                        <span class="opt-letter" aria-hidden="true">D</span>
+                        <span class="opt-text">{{ question.option_d }}</span>
+                    </label>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-top:2.5rem; padding-top:2rem; border-top:1px solid rgba(255,255,255,0.06);">
+                <a href="{% url 'course_detail' quiz.course.id %}" class="btn btn-secondary" id="btn-quit">
+                    &larr; Quit Quiz
+                </a>
+                <button type="submit" class="btn btn-primary btn--lg" id="btn-submit">
+                    Submit Quiz &rarr;
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

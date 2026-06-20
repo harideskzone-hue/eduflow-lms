@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}429 — Too Many Requests — EduFlow LMS{% endblock %}
+{% block body_class %}page-centered{% endblock %}
+
+{% block content %}
+<div class="page-wrapper--narrow animate-scale-in" style="width:100%; padding:2rem 1rem;">
+    <div class="card" style="text-align:center; max-width:500px; margin:0 auto; padding:3.5rem 2.5rem; border-color:rgba(234,179,8,0.2);">
+        <div style="font-size:3.5rem; margin-bottom:1.5rem; filter:drop-shadow(0 4px 12px rgba(234,179,8,0.3));">⏳</div>
+        <h1 style="font-size:1.75rem; font-weight:700; letter-spacing:-0.02em; margin-bottom:1rem; color:#fbbf24;">
+            Too Many Requests
+        </h1>
+        <p class="text-muted" style="font-size:0.95rem; line-height:1.6; margin-bottom:2rem;">
+            You've made too many requests in a short period. Please wait a moment and try again — this keeps our services secure and stable for everyone.
+        </p>
+        <a href="{% url 'dashboard' %}" class="btn btn-primary btn--lg" id="btn-home">
+
+            &larr; Go Back Home
+        </a>
+    </div>
+</div>
+{% endblock %}

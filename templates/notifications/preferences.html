@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Email Notification Settings — EduFlow LMS{% endblock %}
+{% block body_class %}page-standard{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Toggle switch */
+  .toggle-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    gap: 2rem;
+  }
+  .toggle-row:last-of-type { border-bottom: none; }
+  .toggle-info { display: flex; flex-direction: column; gap: 0.25rem; }
+  .toggle-label { font-size: 0.975rem; font-weight: 600; }
+  .toggle-desc  { font-size: 0.825rem; color: var(--text-muted); line-height: 1.5; }
+  .switch { position: relative; display: inline-block; width: 48px; height: 24px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; cursor: pointer;
+    inset: 0; background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 24px; transition: 0.3s;
+  }
+  .slider::before {
+    content: ""; position: absolute;
+    height: 18px; width: 18px; left: 2px; bottom: 2px;
+    background: #cbd5e1; border-radius: 50%; transition: 0.3s;
+  }
+  input:checked + .slider { background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-color: transparent; }
+  input:checked + .slider::before { transform: translateX(24px); background: #fff; }
+  .switch input:focus-visible + .slider { outline: 2px solid var(--accent-primary); outline-offset: 2px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper" style="max-width: 680px; padding: 3rem 2rem;">
+
+    <div class="page-header">
+        <div class="page-header__left">
+            <h1 class="page-title heading-gradient">⚙️ Email Settings</h1>
+            <p class="text-muted">Control which events send you an email notification</p>
+        </div>
+        <a href="{% url 'notification_list' %}" class="btn btn-secondary" id="btn-back">Notifications</a>
+    </div>
+
+    <div class="card">
+        <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.9rem; line-height: 1.6; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.06);">
+            Choose which actions trigger email notifications. You will always receive in-app notifications regardless of these settings.
+        </p>
+
+        <form method="POST" id="preferences-form">
+            {% csrf_token %}
+
+            <div class="toggle-row">
+                <div class="toggle-info">
+                    <span class="toggle-label">Course Enrollments</span>
+                    <span class="toggle-desc">Email confirmation when you enrol in a course.</span>
+                </div>
+                <label class="switch" aria-label="Toggle course enrollment emails">
+                    <input type="checkbox" name="email_enrollments" id="pref-enroll" {% if preference.email_enrollments %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="toggle-row">
+                <div class="toggle-info">
+                    <span class="toggle-label">Quiz Results</span>
+                    <span class="toggle-desc">Email with your score and pass/fail status after submitting a quiz.</span>
+                </div>
+                <label class="switch" aria-label="Toggle quiz result emails">
+                    <input type="checkbox" name="email_quizzes" id="pref-quiz" {% if preference.email_quizzes %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="toggle-row">
+                <div class="toggle-info">
+                    <span class="toggle-label">Certificates Issued</span>
+                    <span class="toggle-desc">Email alert when you earn a completion certificate.</span>
+                </div>
+                <label class="switch" aria-label="Toggle certificate emails">
+                    <input type="checkbox" name="email_certificates" id="pref-cert" {% if preference.email_certificates %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="toggle-row">
+                <div class="toggle-info">
+                    <span class="toggle-label">Discussion Replies</span>
+                    <span class="toggle-desc">Notified when someone replies to your discussion threads.</span>
+                </div>
+                <label class="switch" aria-label="Toggle discussion reply emails">
+                    <input type="checkbox" name="email_discussions" id="pref-disc" {% if preference.email_discussions %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="toggle-row">
+                <div class="toggle-info">
+                    <span class="toggle-label">Announcements</span>
+                    <span class="toggle-desc">Important system and instructor announcements via email.</span>
+                </div>
+                <label class="switch" aria-label="Toggle announcement emails">
+                    <input type="checkbox" name="email_announcements" id="pref-ann" {% if preference.email_announcements %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="form-actions" style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-primary" id="btn-save">Save Settings</button>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Student Learning Report — {{ course.title }} — EduFlow LMS{% endblock %}
+{% block body_class %}page-standard{% endblock %}
+
+{% block extra_css %}
+<style>
+  .report-wrap {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+  }
+  .timeline-container {
+    position: relative;
+    padding-left: 2.5rem;
+    margin-top: 2rem;
+  }
+  .timeline-container::before {
+    content: '';
+    position: absolute;
+    top: 8px; left: 8px;
+    width: 2px; height: calc(100% - 16px);
+    background: rgba(255,255,255,0.08);
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.4s ease-out;
+  }
+  .timeline-dot {
+    position: absolute;
+    top: 4px; left: -2.5rem;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #0f172a;
+    border: 2px solid rgba(255,255,255,0.25);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s;
+  }
+  .timeline-item.completed .timeline-dot {
+    border-color: var(--success);
+    background: rgba(16,185,129,0.15);
+    box-shadow: 0 0 10px rgba(16,185,129,0.3);
+  }
+  .timeline-content {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+  }
+  .timeline-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.25rem; }
+  .timeline-date { font-size: 0.78rem; color: var(--text-muted); font-family: monospace; }
+  .timeline-desc { font-size: 0.9rem; color: var(--text-subtle); margin-top: 0.5rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="report-wrap">
+    
+    <div style="margin-bottom: 2.5rem;">
+        <span class="badge badge-pill" style="margin-bottom: 1.25rem;">Student Learning Report</span>
+        <h1 class="heading-gradient" style="font-size: 2.25rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.2; margin-bottom: 1rem;">
+            {{ course.title }}
+        </h1>
+        <p class="text-muted">Detailed progress, evaluations, and certification history for {{ request.user.username|capfirst }}</p>
+    </div>
+
+    <!-- Core statistics -->
+    <div class="stats-grid" style="margin-bottom: 3rem;" role="region" aria-label="Learning metrics summary">
+        <div class="stat-card">
+            <p class="stat-label">Lessons Completed</p>
+            <p class="stat-value">{{ completed_lessons }} / {{ total_lessons }}</p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-label">Enrollment Date</p>
+            <p class="stat-value" style="font-size: 1.25rem;">{{ enrolled_at|date:"M d, Y"|default:"N/A" }}</p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-label">Completion Date</p>
+            <p class="stat-value" style="font-size: 1.25rem;">{{ completed_at|date:"M d, Y"|default:"In Progress" }}</p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-label">Certificate ID</p>
+            <p class="stat-value" style="font-size: 1.05rem; font-family: monospace; word-break: break-all;">
+                {{ certificate.certificate_id|default:"Not Earned" }}
+            </p>
+        </div>
+    </div>
+
+    <!-- Learning Journey Timeline -->
+    <section style="margin-bottom: 3rem;" aria-labelledby="timeline-heading">
+        <h2 id="timeline-heading" class="section-title heading-gradient">🛣️ Learning Journey Timeline</h2>
+        
+        {% if timeline %}
+        <div class="timeline-container">
+            {% for event in timeline %}
+            <div class="timeline-item {% if event.completed %}completed{% endif %}">
+                <div class="timeline-dot" aria-hidden="true"></div>
+                <div class="timeline-content">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap;">
+                        <h3 class="timeline-title">{{ event.title }}</h3>
+                        <span class="timeline-date">{{ event.date|date:"Y-m-d H:i:s" }}</span>
+                    </div>
+                    <p class="timeline-desc">{{ event.description }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted">No timeline items recorded yet.</p>
+        {% endif %}
+    </section>
+
+    <!-- Quiz Attempts Detail -->
+    <section style="margin-bottom: 3rem;" aria-labelledby="quizzes-heading">
+        <h2 id="quizzes-heading" class="section-title heading-gradient"><i data-lucide="clipboard-list" class="icon-inline"></i> Quiz Evaluation History</h2>
+        
+        {% if quiz_attempts %}
+            <div class="card">
+                <div class="log-list">
+                    {% for attempt in quiz_attempts %}
+                    <div class="log-item" style="border-color: {% if attempt.passed %}rgba(16,185,129,0.15){% else %}rgba(239,68,68,0.15){% endif %};">
+                        <div class="log-header">
+                            <span class="log-time">{{ attempt.attempted_at|date:"M d, Y H:i" }}</span>
+                            <span class="log-tag {% if attempt.passed %}tag-enrollment{% else %}tag-error{% endif %}">
+                                {% if attempt.passed %}Passed{% else %}Failed{% endif %}
+                            </span>
+                        </div>
+                        <p class="log-msg" style="font-size: 0.95rem;">
+                            Quiz: <strong>{{ attempt.quiz.title }}</strong> &bull; Score: <strong>{{ attempt.score }}%</strong> (Passing is {{ attempt.quiz.passing_score }}%)
+                        </p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <p class="text-muted">No quiz attempts recorded yet.</p>
+        {% endif %}
+    </section>
+
+    <!-- Actions -->
+    <div style="display: flex; gap: 0.75rem; justify-content: space-between; align-items: center; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.06);">
+        <a href="{% url 'course_detail' course.id %}" class="btn btn-secondary" id="btn-report-back">
+            &larr; Back to Course
+        </a>
+        {% if certificate %}
+        <a href="{% url 'download_certificate' certificate.certificate_id %}" class="btn btn-primary" id="btn-report-download">
+            Download Certificate PDF
+        </a>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

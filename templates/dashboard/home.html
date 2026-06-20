@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}EduFlow LMS — Empower Your Learning{% endblock %}
+{% block meta_description %}A modern Learning Management System designed to streamline courses, quizzes, and materials with premium performance.{% endblock %}
+{% block body_class %}page-centered{% endblock %}
+
+{% block extra_css %}
+<style>
+  .home-card {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 640px;
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    border-radius: 32px;
+    padding: 4rem 3.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    text-align: center;
+    animation: scaleIn 0.8s cubic-bezier(0.16,1,0.3,1);
+  }
+  .home-card h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    margin-bottom: 1.25rem;
+    color: #0F172A;
+  }
+  .home-card h1 span {
+    color: #0F172A;
+  }
+  .home-card p.lead {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+    margin-bottom: 3rem;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .button-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+  }
+  .admin-link {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .admin-link:hover { color: var(--accent-secondary); }
+
+  /* Featured & Popular sections */
+  .home-section {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 1280px;
+    margin-top: 80px;
+    text-align: center;
+  }
+  .home-section h2 {
+    font-size: 2.25rem;
+    font-weight: 800;
+    margin-bottom: 2.5rem;
+    color: #0F172A;
+  }
+  .course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+  }
+  .course-card-home {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 2rem;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  .course-card-home:hover {
+    transform: translateY(-4px);
+    border-color: rgba(139,92,246,0.3);
+    box-shadow: 0 12px 30px rgba(139,92,246,0.15);
+  }
+  .course-card-home h3 { font-size: 1.15rem; font-weight: 600; margin-bottom: 0.6rem; }
+  .course-card-home h3 a { color: var(--text-primary); text-decoration: none; transition: color 0.2s; }
+  .course-card-home h3 a:hover { color: var(--accent-secondary); }
+  .course-card-home p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem; flex-grow: 1; }
+  .stats-row-home {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  .no-content { color: var(--text-muted); padding: 2rem; grid-column: 1/-1; }
+  .btn-view-course {
+    display: block;
+    margin-top: 1rem;
+    padding: 0.6rem 0.9rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text-primary);
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .btn-view-course:hover {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(139,92,246,0.25);
+    color: var(--text-primary);
+  }
+  @media (max-width: 480px) {
+    .button-grid { grid-template-columns: 1fr; }
+    .home-card { padding: 2.5rem 1.75rem; }
+    .home-card h1 { font-size: 1.9rem; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+    <!-- Hero Card -->
+    <div class="home-card">
+        <span class="badge badge-pill" style="margin-bottom: 1.75rem;">EDUFLOW PLATFORM</span>
+        <h1>Empower Your Learning with <span>EduFlow</span></h1>
+        <p class="lead">A modern Learning Management System designed to streamline courses, quizzes, and materials with premium performance.</p>
+
+        <div class="button-grid" role="navigation" aria-label="Site actions">
+            <a href="{% url 'register' %}" class="btn btn-primary btn--lg" id="btn-register">Register Account</a>
+            <a href="{% url 'login' %}" class="btn btn-secondary btn--lg" id="btn-login">Login</a>
+            <a href="{% url 'course_list' %}" class="btn btn-secondary btn--lg" id="btn-browse">Browse Courses</a>
+        </div>
+
+        <a href="/admin/" class="admin-link" id="admin-link">
+            Admin Dashboard &rarr;
+        </a>
+    </div>
+
+    <!-- Featured Courses -->
+    <section class="home-section" aria-labelledby="featured-heading">
+        <h2 id="featured-heading"><i data-lucide="star" class="icon-inline"></i> Featured Courses</h2>
+        <div class="course-grid">
+            {% for course in featured_courses %}
+            <article class="course-card-home">
+                <span class="badge badge-navy" style="margin-bottom: 1rem;">{{ course.category.name|default:"General" }}</span>
+                <h3><a href="{% url 'course_detail' course.id %}">{{ course.title }}</a></h3>
+                <p>{{ course.description|truncatewords:20 }}</p>
+                <div class="tag-chips">
+                    {% for tag in course.tags.all %}
+                    <span class="tag-chip">{{ tag.name }}</span>
+                    {% empty %}
+                    <span class="tag-chip">General</span>
+                    {% endfor %}
+                </div>
+            </article>
+            {% empty %}
+            <p class="no-content">No featured courses at the moment. Browse all courses below!</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Popular Courses -->
+    <section class="home-section" aria-labelledby="popular-heading" style="margin-bottom: 3rem;">
+        <h2 id="popular-heading">🔥 Popular Courses</h2>
+        <div class="course-grid">
+            {% for course in popular_courses %}
+            <article class="course-card-home">
+                <span class="badge badge-navy" style="margin-bottom: 1rem;">{{ course.category.name|default:"Uncategorized" }}</span>
+                <h3><a href="{% url 'course_detail' course.id %}">{{ course.title }}</a></h3>
+                <p>{{ course.description|truncatechars:120 }}</p>
+                <div class="stats-row-home">
+                    <span><i data-lucide="star" class="icon-inline"></i> {{ course.avg_rating|floatformat:1 }}</span>
+                    <span>👥 {{ course.enrollment_count }} Enrolled</span>
+                    <span>💬 {{ course.review_count }} Reviews</span>
+                </div>
+                <a href="{% url 'course_detail' course.id %}" class="btn-view-course" id="view-course-{{ course.id }}">
+                    View Course &rarr;
+                </a>
+            </article>
+            {% empty %}
+            <p class="no-content">No popular courses available at the moment.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+{% endblock %}

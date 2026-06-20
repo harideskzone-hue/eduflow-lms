@@ -1,0 +1,80 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EduFlow LMS{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}EduFlow LMS — A modern Learning Management System for online courses, quizzes, and certificates.{% endblock %}">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Main Design System -->
+    <link rel="stylesheet" href="{% static 'css/main.css' %}?v=2.0">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}?v=1.0">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{% block body_class %}page-standard{% endblock %}" data-username="{{ request.user.username|default:'' }}">
+
+    <!-- Decorative ambient glows (screen-reader hidden) -->
+    <div class="ambient-glow" aria-hidden="true"></div>
+    <div class="ambient-glow-2" aria-hidden="true"></div>
+
+    <!-- ── Flash Messages & Celebrations ───────────────────────── -->
+    <script>
+      window.eduflowEvents = [];
+    </script>
+    {% if messages %}
+    <div class="flash-messages" role="status" aria-live="polite" aria-atomic="false">
+        {% for message in messages %}
+            {% if 'celebration' in message.tags %}
+                <script>
+                    window.eduflowEvents.push({{ message|safe }});
+                </script>
+            {% else %}
+            <div class="flash flash-{{ message.tags }}" role="alert">
+                <span class="flash__icon" aria-hidden="true">
+                    {% if message.tags == 'success' %}✅
+                    {% elif message.tags == 'error' or message.tags == 'danger' %}❌
+                    {% elif message.tags == 'warning' %}⚠️
+                    {% else %}ℹ️{% endif %}
+                </span>
+                <span class="flash__text">{{ message }}</span>
+                <button class="flash__close" onclick="dismissFlash(this)" aria-label="Dismiss notification">×</button>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Mobile Nav Overlay -->
+    <div class="nav-drawer-overlay" id="nav-overlay" aria-hidden="true"></div>
+
+    <!-- ── Global Navigation ───────────────────────────────── -->
+    {% if not hide_nav %}
+        {% include '_navbar.html' %}
+    {% endif %}
+
+    <!-- ── Command Palette ─────────────────────────────────── -->
+    {% include 'components/_command_palette.html' %}
+
+    <!-- ── Page Content ────────────────────────────────────── -->
+    {% block content %}{% endblock %}
+
+    <!-- Shared JS -->
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/notifications.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="{% static 'js/celebrations.js' %}"></script>
+    <script src="{% static 'js/command_palette.js' %}"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+      lucide.createIcons();
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

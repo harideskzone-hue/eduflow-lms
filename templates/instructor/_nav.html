@@ -1,0 +1,33 @@
+{# Shared instructor nav bar — {% include "instructor/_nav.html" %} #}
+<header class="instructor-header" role="banner" style="display:flex; justify-content:space-between; align-items:center; padding:1.2rem 2rem; background:#0F172A; border-bottom:1px solid rgba(255,255,255,0.08); position:sticky; top:0; z-index:100; flex-wrap:wrap; gap:1rem;">
+    <div>
+        <a href="{% url 'instructor_dashboard' %}" class="logo" aria-label="Instructor Portal Home" style="color: #FFFFFF; font-weight: 800; font-size: 1.25rem; text-decoration: none; letter-spacing: -0.02em; display: flex; align-items: center; gap: 0.5rem;">
+            <div style="width: 28px; height: 28px; background: #2563EB; border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="layers" style="width: 16px; height: 16px; color: #FFF;"></i>
+            </div>
+            EduFlow <span style="color: #94A3B8; font-weight: 600;">Instructor</span>
+        </a>
+    </div>
+    <nav aria-label="Instructor navigation" style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+        <style>
+            .inst-nav-link { color: #94A3B8; font-weight: 600; font-size: 0.9rem; text-decoration: none; padding: 0.5rem 0.75rem; border-radius: 8px; transition: all 0.2s ease; }
+            .inst-nav-link:hover { background: rgba(255,255,255,0.08); color: #FFFFFF; }
+            .inst-nav-btn { font-weight: 600; font-size: 0.85rem; text-decoration: none; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s ease; border: 1px solid transparent; }
+            .inst-nav-btn-cyan { background: rgba(6, 182, 212, 0.15); color: #22D3EE; border-color: rgba(6, 182, 212, 0.3); }
+            .inst-nav-btn-cyan:hover { background: rgba(6, 182, 212, 0.25); color: #67E8F9; transform: translateY(-1px); }
+            .inst-nav-btn-green { background: rgba(16, 185, 129, 0.15); color: #34D399; border-color: rgba(16, 185, 129, 0.3); }
+            .inst-nav-btn-green:hover { background: rgba(16, 185, 129, 0.25); color: #6EE7B7; transform: translateY(-1px); }
+        </style>
+        <a href="{% url 'manage_courses' %}" class="inst-nav-link" id="nav-courses">Courses</a>
+        <a href="{% url 'manage_materials' %}" class="inst-nav-link" id="nav-lessons">Lessons</a>
+        <a href="{% url 'manage_quizzes' %}" class="inst-nav-link" id="nav-quizzes">Quizzes</a>
+        <a href="#" class="inst-nav-link" id="nav-settings">Settings</a>
+        <a href="{% url 'manage_discussions' %}" class="inst-nav-link" id="nav-discussions">Discussions</a>
+        <a href="{% url 'manage_announcements' %}" class="inst-nav-link" id="nav-announcements">Announcements</a>
+        <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.1); margin: 0 0.5rem;"></div>
+        <a href="{% url 'monitoring_dashboard' %}" class="inst-nav-btn inst-nav-btn-cyan" id="nav-monitoring">Monitoring</a>
+        <a href="{% url 'reports_dashboard' %}" class="inst-nav-btn inst-nav-btn-green" id="nav-reports">Reports</a>
+        <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.1); margin: 0 0.5rem;"></div>
+        <a href="{% url 'dashboard' %}" class="inst-nav-link" id="nav-lms" style="color: #CBD5E1;">← LMS</a>
+    </nav>
+</header>

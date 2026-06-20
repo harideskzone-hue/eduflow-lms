@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Notifications — EduFlow LMS{% endblock %}
+{% block body_class %}page-standard{% endblock %}
+
+{% block content %}
+<div class="page-wrapper" style="padding: 3rem 2rem;">
+
+    <div class="page-header">
+        <div class="page-header__left">
+            <h1 class="page-title heading-gradient"><i data-lucide="bell" style="width:28px; vertical-align:-4px;"></i> Notifications</h1>
+            <p class="text-muted">Your recent activity and alerts</p>
+        </div>
+        <div class="page-header__right" style="display: flex; gap: 1rem;">
+            <button id="markAllReadPageBtn" class="btn btn-secondary" style="border-color: var(--border);"><i data-lucide="check-check"></i> Mark All Read</button>
+            <a href="{% url 'notification_preferences' %}" class="btn btn-secondary"><i data-lucide="settings"></i> Preferences</a>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary" id="btn-dashboard">&larr; Dashboard</a>
+        </div>
+    </div>
+
+    <div class="card" style="padding: 0; overflow: hidden;">
+        {% for notification in notifications %}
+        <div class="data-row {% if not notification.is_read %}unread-row{% endif %}"
+             style="padding: 1.25rem 1.75rem; {% if not notification.is_read %}border-left: 3px solid var(--accent-primary); background: rgba(139,92,246,0.04);{% endif %}"
+             role="article" aria-label="{{ notification.title }}{% if not notification.is_read %}, unread{% endif %}">
+            <div class="data-row__info" style="flex: 1;">
+                <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.3rem;">
+                    <span class="data-row__title">{{ notification.title }}</span>
+                    {% if not notification.is_read %}
+                    <span style="width: 8px; height: 8px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-radius: 50%; display: inline-block; flex-shrink: 0;" aria-label="Unread"></span>
+                    {% endif %}
+                </div>
+                <p class="data-row__sub" style="font-size: 0.9rem; line-height: 1.5; max-width: 600px;">{{ notification.message }}</p>
+                <span class="data-row__sub" style="font-size: 0.775rem; margin-top: 0.3rem; display: block;">{{ notification.created_at|date:"M d, Y H:i" }}</span>
+            </div>
+            <div class="data-row__actions" style="display: flex; gap: 0.5rem;">
+                {% if notification.link %}
+                <a href="{{ notification.link }}" class="btn btn--sm btn-secondary"><i data-lucide="external-link"></i> View</a>
+                {% endif %}
+                {% if not notification.is_read %}
+                <a href="{% url 'mark_notification_read' notification.id %}"
+                   class="btn btn--sm btn-primary"
+                   id="read-{{ notification.id }}"
+                   aria-label="Mark notification as read">
+                    Mark Read
+                </a>
+                {% else %}
+                <span class="badge badge-green"><i data-lucide="check"></i> Read</span>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state" style="padding: 4rem 2rem;">
+            <div class="empty-state__icon"><i data-lucide="bell-off" style="width: 48px; height: 48px; color: var(--border);"></i></div>
+            <p class="empty-state__title">No notifications yet</p>
+            <p class="empty-state__text">You're all caught up! Notifications will appear here.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const markAllReadPageBtn = document.getElementById('markAllReadPageBtn');
+    if (markAllReadPageBtn) {
+        markAllReadPageBtn.addEventListener('click', () => {
+            fetch('/notifications/api/mark-all-read/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            }).then(res => res.json()).then(data => {
+                if (data.status === 'success') {
+                    window.location.reload();
+                }
+            });
+        });
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

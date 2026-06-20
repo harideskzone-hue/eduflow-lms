@@ -1,0 +1,144 @@
+from django.urls import path
+from .views import (
+    instructor_dashboard, create_course, manage_courses, edit_course, delete_course,
+    manage_materials, create_material, edit_material, delete_material,
+    manage_quizzes, create_quiz, edit_quiz, delete_quiz,
+    manage_questions, create_question, edit_question, delete_question,
+    manage_categories, create_category, edit_category, delete_category,
+    manage_tags, create_tag, edit_tag, delete_tag,
+    course_analytics
+)
+
+urlpatterns = [
+    # ... Course, Material, Quiz, and Category paths ...
+    path(
+        "",
+        instructor_dashboard,
+        name="instructor_dashboard"
+    ),
+    path(
+        "courses/create/",
+        create_course,
+        name="create_course"
+    ),
+    path(
+        "courses/",
+        manage_courses,
+        name="manage_courses"
+    ),
+    path(
+        "courses/<int:pk>/edit/",
+        edit_course,
+        name="edit_course"
+    ),
+    path(
+        "courses/<int:pk>/delete/",
+        delete_course,
+        name="delete_course"
+    ),
+    path(
+        "courses/<int:pk>/analytics/",
+        course_analytics,
+        name="course_analytics"
+    ),
+    path(
+        "materials/",
+        manage_materials,
+        name="manage_materials"
+    ),
+    path(
+        "materials/create/",
+        create_material,
+        name="create_material"
+    ),
+    path(
+        "materials/<int:pk>/edit/",
+        edit_material,
+        name="edit_material"
+    ),
+    path(
+        "materials/<int:pk>/delete/",
+        delete_material,
+        name="delete_material"
+    ),
+    path(
+        "quizzes/",
+        manage_quizzes,
+        name="manage_quizzes"
+    ),
+    path(
+        "quizzes/create/",
+        create_quiz,
+        name="create_quiz"
+    ),
+    path(
+        "quizzes/<int:pk>/edit/",
+        edit_quiz,
+        name="edit_quiz"
+    ),
+    path(
+        "quizzes/<int:pk>/delete/",
+        delete_quiz,
+        name="delete_quiz"
+    ),
+    path(
+        "quizzes/<int:quiz_id>/questions/",
+        manage_questions,
+        name="manage_questions"
+    ),
+    path(
+        "quizzes/<int:quiz_id>/questions/create/",
+        create_question,
+        name="create_question"
+    ),
+    path(
+        "questions/<int:pk>/edit/",
+        edit_question,
+        name="edit_question"
+    ),
+    path(
+        "questions/<int:pk>/delete/",
+        delete_question,
+        name="delete_question"
+    ),
+    path(
+        "categories/",
+        manage_categories,
+        name="manage_categories"
+    ),
+    path(
+        "categories/create/",
+        create_category,
+        name="create_category"
+    ),
+    path(
+        "categories/<int:pk>/edit/",
+        edit_category,
+        name="edit_category"
+    ),
+    path(
+        "categories/<int:pk>/delete/",
+        delete_category,
+        name="delete_category"
+    ),
+    path(
+        "tags/",
+        manage_tags,
+        name="manage_tags"
+    ),
+    path(
+        "tags/create/",
+        create_tag,
+        name="create_tag"
+    ),
+    path(
+        "tags/<int:pk>/edit/",
+        edit_tag,
+        name="edit_tag"
+    ),
+    path(
+        "tags/<int:pk>/delete/",
+        delete_tag,
+        name="delete_tag"
+    ),
+]

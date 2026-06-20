@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Create Course — EduFlow LMS{% endblock %}
+{% block body_class %}page-centered{% endblock %}
+
+{% block extra_css %}
+<style>
+  .builder-header {
+      background: linear-gradient(135deg, #0F172A, #1e293b);
+      color: #fff;
+      padding: 3rem 2rem;
+      border-radius: 24px;
+      margin-bottom: 2rem;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(15,23,42,0.15);
+  }
+  .builder-header h1 { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+  .builder-header p { color: #94A3B8; font-size: 1.1rem; }
+  
+  .form-section {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.02);
+  }
+  .section-title { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+  
+  .checkbox-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 2rem auto; width: 100%;">
+    {% include "instructor/_nav.html" %}
+    
+    <div class="builder-header">
+        <h1>Course Builder</h1>
+        <p>Design a new learning experience for your students.</p>
+    </div>
+    
+    <form method="POST" enctype="multipart/form-data" id="create-course-form" novalidate>
+        {% csrf_token %}
+        
+        <div class="form-section">
+            <h3 class="section-title">1. Course Hero & Info</h3>
+            
+            <div class="form-group {% if form.title.errors %}has-error{% endif %}">
+                <label class="form-label" for="{{ form.title.id_for_label }}">Course Title *</label>
+                {{ form.title }}
+                {% if form.title.errors %}<div class="form-error">{{ form.title.errors }}</div>{% endif %}
+            </div>
+            
+            <div class="form-group {% if form.description.errors %}has-error{% endif %}">
+                <label class="form-label" for="{{ form.description.id_for_label }}">Description & Outcomes *</label>
+                {{ form.description }}
+                <p class="form-help">Explain what students will learn and achieve.</p>
+                {% if form.description.errors %}<div class="form-error">{{ form.description.errors }}</div>{% endif %}
+            </div>
+            
+            <div class="form-group {% if form.thumbnail.errors %}has-error{% endif %}">
+                <label class="form-label" for="{{ form.thumbnail.id_for_label }}">Course Thumbnail</label>
+                {{ form.thumbnail }}
+                {% if form.thumbnail.errors %}<div class="form-error">{{ form.thumbnail.errors }}</div>{% endif %}
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="section-title">2. Curriculum & Categorization</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="form-group {% if form.category.errors %}has-error{% endif %}">
+                    <label class="form-label" for="{{ form.category.id_for_label }}">Primary Category *</label>
+                    {{ form.category }}
+                    {% if form.category.errors %}<div class="form-error">{{ form.category.errors }}</div>{% endif %}
+                </div>
+            </div>
+            
+            <div class="form-group" style="margin-top: 1rem;">
+                <label class="form-label">Skills Covered</label>
+                <div class="checkbox-grid">
+                    {{ form.skills }}
+                </div>
+                <p class="form-help" style="margin-top:0.5rem;">These map directly to the student's Career Dashboard.</p>
+            </div>
+            
+            <div class="form-group" style="margin-top: 1.5rem;">
+                <label class="form-label">Tags</label>
+                <div class="checkbox-grid">
+                    {{ form.tags }}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="section-title">3. Publishing Options</h3>
+            <div class="form-group" style="display:flex; align-items:center; gap: 0.5rem;">
+                {{ form.is_featured }}
+                <label class="form-label" for="{{ form.is_featured.id_for_label }}" style="margin:0;">Feature this course on the homepage</label>
+            </div>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-bottom: 4rem;">
+            <a href="{% url 'manage_courses' %}" class="btn btn-secondary btn--lg">Cancel</a>
+            <button type="submit" class="btn btn-primary btn--lg">Create Course</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,304 @@
+/* ============================================================
+   EduFlow LMS — Component Library (P0.5)
+   ============================================================ */
+
+/* ── 1. BUTTONS ────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+.btn--sm  { padding: 0.5rem 1rem; font-size: 13px; border-radius: var(--radius-sm); }
+.btn--lg  { padding: 1rem 2.5rem; font-size: 16px; border-radius: var(--radius-lg); }
+.btn--full { width: 100%; }
+
+.btn-primary {
+  background: var(--accent-primary);
+  color: #FFFFFF !important;
+  box-shadow: var(--shadow-sm);
+}
+.btn-primary:hover {
+  background: #1E293B;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  color: #FFFFFF;
+}
+
+.btn-secondary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+.btn-secondary:hover {
+  background: #F8FAFC;
+  border-color: #D1D5DB;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  color: var(--text-primary);
+}
+
+.btn-premium {
+  background: linear-gradient(135deg, var(--accent-gold), #F4E28A);
+  color: var(--accent-primary);
+  box-shadow: var(--shadow-sm);
+}
+.btn-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(212,175,55,0.2);
+  color: var(--accent-primary);
+}
+
+/* ── 2. CARDS ──────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.25s ease;
+}
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* ── 3. BADGES ─────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.badge-blue { background: #EFF6FF; color: var(--accent-secondary); border: 1px solid #DBEAFE; }
+.badge-navy { background: #F1F5F9; color: var(--accent-primary); border: 1px solid #E2E8F0; }
+.badge-gold { background: #FEF9C3; color: var(--accent-gold); border: 1px solid #FEF08A; }
+.badge-success { background: #DCFCE7; color: var(--success); border: 1px solid #BBF7D0; }
+
+/* ── 4. INPUTS ─────────────────────────────────────────────── */
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: var(--surface);
+  transition: all 0.2s ease;
+}
+.input:focus {
+  outline: none;
+  border-color: var(--accent-secondary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+
+/* ── 5. AVATARS ────────────────────────────────────────────── */
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: #E2E8F0;
+  color: var(--accent-primary);
+  font-weight: 600;
+  object-fit: cover;
+}
+.avatar-sm { width: 32px; height: 32px; font-size: 14px; }
+.avatar-md { width: 48px; height: 48px; font-size: 18px; }
+.avatar-lg { width: 120px; height: 120px; font-size: 40px; border: 2px solid var(--accent-secondary); }
+
+/* ── 6. PROGRESS BARS ──────────────────────────────────────── */
+.progress-container {
+  width: 100%;
+  background: #E2E8F0;
+  border-radius: var(--radius-full);
+  height: 8px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  background: var(--accent-secondary);
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease-out;
+}
+.progress-bar.success { background: var(--success); }
+.progress-bar.gold { background: var(--accent-gold); }
+
+/* ── 7. EMPTY STATES ───────────────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--surface);
+  border: 1px dashed #CBD5E1;
+  border-radius: var(--radius-lg);
+}
+.empty-state__icon {
+  font-size: 32px;
+  color: var(--text-subtle);
+  margin-bottom: 1rem;
+}
+.empty-state__title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+/* ── P7 Microinteractions & Delight ─────────────────────── */
+.xp-toast {
+    position: fixed;
+    bottom: -100px;
+    right: 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    z-index: 9999;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 0;
+}
+.xp-toast.show {
+    bottom: 20px;
+    opacity: 1;
+}
+.xp-toast-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    background: rgba(212,175,55,0.1);
+    color: var(--accent-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.xp-toast-title {
+    font-weight: 700;
+    color: var(--accent-gold);
+    font-size: 1rem;
+    line-height: 1.2;
+}
+.xp-toast-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.celebration-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(8px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+.celebration-overlay.show {
+    opacity: 1;
+    pointer-events: all;
+}
+.achievement-modal, .milestone-modal {
+    background: var(--card-bg);
+    border-radius: 24px;
+    padding: 3rem 2rem;
+    text-align: center;
+    border: 2px solid var(--accent-gold);
+    box-shadow: 0 0 40px rgba(212,175,55,0.2);
+    transform: scale(0.9);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    max-width: 400px;
+    width: 90%;
+}
+.celebration-overlay.show .achievement-modal, 
+.celebration-overlay.show .milestone-modal {
+    transform: scale(1);
+}
+.achievement-modal-badge, .milestone-modal-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 40px;
+    background: linear-gradient(135deg, var(--accent-gold), #B8860B);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 10px 20px rgba(212,175,55,0.3);
+}
+.achievement-modal-badge svg, .milestone-modal-icon svg {
+    width: 40px;
+    height: 40px;
+}
+.achievement-modal-title, .milestone-modal-title {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent-gold);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+.achievement-modal-name, .milestone-modal-path {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+}
+.milestone-modal-progress {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent-primary);
+    margin-bottom: 1.5rem;
+}
+
+/* ── P7 Skeletons ─────────────────────────────────────────── */
+.skeleton {
+    background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+    border-radius: 4px;
+}
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+.skeleton-line {
+    height: 14px;
+    width: 100%;
+    margin-bottom: 8px;
+}
+.skeleton-avatar {
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+}
+.skeleton-card {
+    height: 150px;
+    width: 100%;
+    border-radius: var(--radius-lg);
+}
