@@ -140,7 +140,7 @@ def thread_detail(request, thread_id):
 
 @staff_member_required
 def manage_discussions(request):
-    threads = DiscussionThread.objects.select_related("course", "author").all()
+    threads = DiscussionThread.objects.select_related("material", "material__course", "author").all()
     return render(
         request,
         "instructor/manage_discussions.html",
